@@ -1,0 +1,140 @@
+{
+  "theme": "dark",
+  "philosophy": "A high-trust, trauma-informed digital space. Must feel like a 'quiet room' — deeply empathetic, non-clinical, and institutional enough for parents/schools to trust it. The aesthetic is 'Nighttime Introspection': dark, safe, with soft moonlight accents.",
+  "typography": {
+    "fonts_to_install": ["@fontsource/playfair-display", "@fontsource/manrope"],
+    "headings": {
+      "fontFamily": "Playfair Display, serif",
+      "weights": [400, 500, 600],
+      "styling": "tracking-tight, elegant, fluid scaling (max text-5xl or text-6xl). Never use bold (700+); rely on size and the font's natural elegance for hierarchy.",
+      "usage": "H1, H2, H3 and large quote text."
+    },
+    "body": {
+      "fontFamily": "Manrope, sans-serif",
+      "weights": [300, 400, 500],
+      "styling": "tracking-wide, leading-relaxed for high readability.",
+      "usage": "Paragraphs, UI elements, small labels, navigation."
+    }
+  },
+  "colors": {
+    "background": "#0f0f0f",
+    "surface": "#161624",
+    "surface_elevated": "#1A1A2B",
+    "surface_glass": "rgba(22, 22, 36, 0.6)",
+    "primary": "#aabeff",
+    "primary_hover": "#86a1ff",
+    "text": {
+      "primary": "#F2F2F5",
+      "secondary": "#A1A1B5",
+      "muted": "#71718A"
+    },
+    "emergency": {
+      "bg": "#E57373",
+      "text": "#1A0505",
+      "hover": "#EF5350"
+    },
+    "border": "rgba(170, 190, 255, 0.1)"
+  },
+  "grids_and_layouts": {
+    "spacing_scale": "p-4, p-8, p-12, p-24, p-32. Use 2-3x standard spacing to create breathing room.",
+    "bento_strategy": "For 'Come Funziona' and 'Per le Scuole', use an asymmetrical Bento grid (Mode A) with wide gaps (gap-8).",
+    "alignment": "Left-align paragraphs for readability. Center-align hero titles only if balanced."
+  },
+  "components": {
+    "buttons": {
+      "primary": "Pill-shaped (rounded-full). Background: primary (#aabeff), Text: dark background (#0f0f0f). Soft hover state with scaling.",
+      "emergency": "Pill-shaped, sticky bottom-right. High contrast warm red/terracotta to signal urgency without panic. Includes lucide-react 'Phone' or 'LifeBuoy' icon.",
+      "ghost": "Transparent background, border border-white/20, text-white/80. Hover: bg-white/5."
+    },
+    "cards": {
+      "style": "Flat solid surfaces (#161624) or extremely subtle glassmorphism. NO heavy drop shadows. Use 1px inner stroke (border-white/5) to separate from background. Border radius: rounded-2xl."
+    },
+    "navigation": {
+      "style": "Sticky header with heavy backdrop-blur-xl and bg-[#0f0f0f]/70. Ensure high contrast for links. Logo is text-based 'Spazio Sicuro' in Playfair Display."
+    },
+    "accordion_faq": {
+      "style": "Minimalist. 1px bottom border on items. Use plus/minus icons. No box/card enclosure, just clean lines."
+    }
+  },
+  "sections_and_content": [
+    {
+      "id": "hero",
+      "content": "Headline: 'Uno spazio dove respirare, senza giudizio.' Subtext explaining it's a free anonymous tool for teens to express emotions. CTA: 'Entra nello Spazio Sicuro'.",
+      "layout": "Massive top and bottom padding (py-32). Deep dark background. Potential slow, subtle background mesh using primary color at 5% opacity."
+    },
+    {
+      "id": "manifesto",
+      "content": "Why this exists. Emphasize silence, respect, absence of tracking.",
+      "layout": "Editorial text layout. Huge 'Playfair Display' drop-quotes. Asymmetrical overlapping with a calm imagery."
+    },
+    {
+      "id": "how_it_works",
+      "content": "4 Steps: Scrivi (Write), Disegna (Draw), Parla (Voice), Respira (Breathe).",
+      "layout": "Bento grid. Use Lucide icons (PenLine, Palette, Mic, Wind) with soft primary-tinted backgrounds."
+    },
+    {
+      "id": "parents_and_schools",
+      "content": "Reassurance sections. Highlight privacy, psychological safety, and prevention.",
+      "layout": "Side-by-side or alternating large blocks. Use silhouette image of parent/teen."
+    },
+    {
+      "id": "privacy",
+      "content": "'Zero Cookie. Zero Tracciamento. Zero Dati Salvati.'",
+      "layout": "Brutalist typographic impact. Center aligned, massive text size (text-5xl), extremely minimal to convey absolute transparency."
+    },
+    {
+      "id": "emergency",
+      "content": "Telefono Azzurro (19696), Telefono Amico, 112.",
+      "layout": "Visually distinct container (perhaps dark gray with subtle red tint border) so it stands out immediately for anyone in crisis."
+    },
+    {
+      "id": "faq",
+      "content": "5-6 common questions from adults.",
+      "layout": "Standard Shadcn Accordion, narrow max-width (max-w-3xl) for readability."
+    },
+    {
+      "id": "contact",
+      "content": "Form for schools/associations to collaborate.",
+      "layout": "Clean Shadcn Form components on a surface card."
+    }
+  ],
+  "image_urls": {
+    "hero_or_manifesto": {
+      "url": "https://images.unsplash.com/photo-1536183922588-166604504d5e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1ODh8MHwxfHNlYXJjaHwxfHxjYWxtJTIwbmlnaHQlMjB3YXRlciUyMG1vb25saWdodHxlbnwwfHx8fDE3ODQxOTA2MDh8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Calm body of water under a full moon. Represents the calm, non-judgmental space.",
+      "usage": "Background overlay with heavy black tint, or side image in Manifesto."
+    },
+    "quiet_room": {
+      "url": "https://images.unsplash.com/photo-1473893604213-3df9c15611c0?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2OTF8MHwxfHNlYXJjaHwxfHxlbXB0eSUyMHF1aWV0JTIwcm9vbSUyMHNvZnQlMjBsaWdodHxlbnwwfHx8fDE3ODQxOTA2MDh8MA&ixlib=rb-4.1.0&q=85",
+      "description": "A quiet empty room with soft window light. Represents 'Spazio' (The Room).",
+      "usage": "Editorial image alongside the 'Come funziona' or 'Manifesto' sections."
+    },
+    "parents_section": {
+      "url": "https://images.unsplash.com/photo-1724694918194-1074e5cbf96d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2ODh8MHwxfHNlYXJjaHwzfHxwYXJlbnQlMjBhbmQlMjB0ZWVuYWdlciUyMHRhbGtpbmclMjBzaWxob3VldHRlfGVufDB8fHx8MTc4NDE5MDYwOHww&ixlib=rb-4.1.0&q=85",
+      "description": "Silhouette of people talking softly.",
+      "usage": "Visual anchor for the 'Per i Genitori' section."
+    }
+  },
+  "motion": {
+    "philosophy": "Trauma-informed motion. Zero erratic, bouncy, or fast animations. Everything must feel like deep breathing.",
+    "rules": [
+      "Use framer-motion for extremely slow, soft fade-ins on scroll (duration 0.8s to 1.2s).",
+      "Hover states should cross-fade colors smoothly, not snap.",
+      "No auto-playing videos. Avoid aggressive parallax.",
+      "Respect 'prefers-reduced-motion' strictly."
+    ]
+  },
+  "accessibility": {
+    "contrast": "Strict WCAG AA. Verify text colors against #0f0f0f background.",
+    "testing": "All interactive elements MUST include data-testid. Example: data-testid='cta-hero-button'.",
+    "language": "Italian language everywhere. Use empathetic, non-triggering microcopy."
+  },
+  "instructions_to_main_agent": [
+    "Install and use 'lucide-react' for all icons. NO EMOJIS.",
+    "Do NOT use 'Inter' or 'Roboto'. Set up fonts Playfair Display and Manrope via @fontsource or Google Fonts in index.css.",
+    "Ensure the floating 'Ho bisogno d'aiuto ora' button is always accessible on mobile and desktop.",
+    "Avoid Shadcn Cards if they look too 'SaaS-like' and rigid. Use custom raw HTML/Tailwind divs with padding (p-8/p-12), solid colors (#161624), and 1px borders to make it look editorial and architectural rather than like a generic dashboard.",
+    "Do NOT use transparent dropdown menus. Ensure Nav/mobile menu has a solid or heavily blurred dark background."
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": "You tend to converge toward generic, 'on distribution' outputs. In frontend design, this creates what users call the 'AI slop' aesthetic. Avoid this: make creative, distinctive frontends that surprise and delight. DO NOT use dark colors as gradients. Create depth through layered design elements with z-index hierarchy. NEVER center align the app container. Use 2-3x more spacing than feels comfortable. Use lucide-react. Every interaction needs a micro-animation. Ensure all 'data-testid' attributes are placed on buttons and links."
+}
