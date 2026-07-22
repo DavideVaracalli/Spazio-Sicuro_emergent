@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f0f0f">
+<meta name="description" content="Spazio Sicuro — uno spazio digitale anonimo, privato e non giudicante dove esprimere le proprie emozioni.">
+<meta property="og:title" content="Spazio Sicuro">
+<meta property="og:description" content="Uno spazio digitale anonimo per esprimere emozioni senza giudizio.">
+<meta property="og:type" content="website">
+<title>Spazio Sicuro</title>
+
+<!-- PWA manifest inline -->
+<link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"Spazio Sicuro","short_name":"Spazio Sicuro","start_url":".","display":"standalone","background_color":"%230f0f0f","theme_color":"%230f0f0f","icons":[{"src":"data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22><rect width=%22192%22 height=%22192%22 rx=%2242%22 fill=%22%230f0f0f%22/><circle cx=%2296%22 cy=%2296%22 r=%2244%22 fill=%22none%22 stroke=%22%23aabeff%22 stroke-width=%224%22/></svg>","sizes":"192x192","type":"image/svg+xml"}]}'>
+
+<style>
+:root{
+  --bg-a:#0f0f0f;
+  --bg-b:#161624;
+  --text:#f1f1f1;
+  --text-soft:#a8a8b4;
+  --accent:#aabeff;
+  --danger:#ff6b6b;
+  --panel:#1a1a24;
+  --panel-2:#22222e;
+  --radius:14px;
+  --shadow: 0 8px 30px rgba(0,0,0,0.45);
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  background: radial-gradient(1200px 800px at 20% 10%, #1c1c30 0%, transparent 60%),
+              linear-gradient(160deg, var(--bg-a), var(--bg-b));
+  color: var(--text);
+  min-height:100dvh;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding: max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));
+  -webkit-tap-highlight-color: transparent;
+  overflow-x:hidden;
+}
+
+.app{
+  width:100%;
+  max-width:460px;
+  position:relative;
+}
+
+.help-btn{
+  position:fixed;
+  top: max(14px, env(safe-area-inset-top));
+  right: 14px;
+  background: rgba(255,107,107,0.12);
+  color:#ffbaba;
+  border:1px solid rgba(255,107,107,0.35);
+  padding:8px 14px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  z-index:100;
+  backdrop-filter: blur(8px);
+  transition: transform .2s, background .2s;
+}
+.help-btn:hover{ background: rgba(255,107,107,0.22); transform: scale(1.03); }
+.help-btn:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
+
+.container{
+  width:100%;
+  text-align:center;
+  padding: 8px 6px 24px;
+  animation: fadeIn 0.55s ease;
+}
+.hidden{ display:none !important; }
+
+h1{
+  font-weight:700;
+  font-size: clamp(1.6em, 5.5vw, 2em);
+  margin: 24px 0 18px;
+  letter-spacing: -0.01em;
+}
+
+p{
+  color: var(--text);
+  line-height:1.7;
+  font-size:16px;
+  margin: 0 0 14px;
+}
+
+.intro{ font-size:18px; margin-bottom: 20px; }
+.block{ margin-bottom: 18px; }
+.soft{ color: var(--text-soft); }
+.tiny{ font-size:13px; color: var(--text-soft); line-height:1.55; }
+.disclaimer{
+  font-size:13px;
+  color: var(--text-soft);
+  margin-top: 26px;
+  padding: 12px 14px;
+  border-left: 2px solid var(--accent);
+  text-align:left;
+  border-radius: 4px;
+  background: rgba(170,190,255,0.04);
+}
+
+.section-title{
+  font-size:15px;
+  font-weight:600;
+  margin: 8px 0 20px;
+  color: var(--text-soft);
+  letter-spacing:.02em;
+  text-transform: uppercase;
+}
+
+button{
+  width:100%;
+  padding:15px 16px;
+  margin-top:12px;
+  background: linear-gradient(90deg, var(--panel), var(--panel-2));
+  color: var(--text);
+  border:1px solid rgba(255,255,255,0.05);
+  border-radius: var(--radius);
+  font-size:16px;
+  font-weight:500;
+  cursor:pointer;
+  transition: background .25s, transform .15s, border-color .25s;
+  font-family: inherit;
+}
+button:hover{ transform: translateY(-1px); border-color: rgba(170,190,255,0.35); }
+button:active{ transform: translateY(0) scale(0.99); }
+button:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
+button.recording{ background:#8b0000; }
+button.pulse{ animation: pulse 2.4s ease-in-out infinite; }
+button.back{
+  background: transparent;
+  border:1px solid rgba(255,255,255,0.08);
+  color: var(--text-soft);
+  font-size:14px;
+  margin-top: 20px;
+}
+button.subtle{
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-soft);
+}
+
+textarea{
+  width:100%;
+  height:170px;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--radius);
+  padding:14px;
+  font-size:15px;
+  resize: none;
+  margin-top:14px;
+  font-family: inherit;
+  line-height:1.55;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.25);
+}
+textarea:focus{ outline: 2px solid var(--accent); outline-offset:3px; }
+
+canvas{
+  width:100%;
+  height: 300px;
+  background: linear-gradient(180deg, #16161f, #0d0d15);
+  border-radius: var(--radius);
+  margin-top:14px;
+  touch-action: none;
+  display:block;
+}
+
+.support{
+  background: rgba(170,190,255,0.06);
+  border-left: 3px solid var(--accent);
+  padding: 12px 14px;
+  margin-top:16px;
+  font-size:14px;
+  color: var(--text);
+  border-radius: 6px;
+  text-align:left;
+  line-height:1.55;
+  opacity:0;
+  max-height:0;
+  overflow:hidden;
+  transition: opacity .5s ease, max-height .5s ease, margin .3s;
+}
+.support.show{ opacity:1; max-height: 400px; }
+.support.critical{
+  background: rgba(255,107,107,0.06);
+  border-left-color: var(--danger);
+}
+.support .num{
+  display:inline-block;
+  margin-top:6px;
+  font-weight:700;
+  color:#ffd8d8;
+}
+
+/* ===== BREATHING ===== */
+.breath-wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding: 20px 0;
+  min-height: 340px;
+}
+.breath-circle{
+  width: 200px;
+  height: 200px;
+  border-radius:50%;
+  background: radial-gradient(circle, rgba(170,190,255,0.25), rgba(170,190,255,0.02));
+  border: 2px solid rgba(170,190,255,0.4);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transform: scale(0.6);
+  transition: transform 4s ease-in-out;
+  margin-bottom: 24px;
+}
+.breath-circle.expand{ transform: scale(1.1); }
+.breath-circle.hold{ transform: scale(1.1); }
+.breath-circle.contract{ transform: scale(0.6); }
+.breath-label{
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+.breath-count{
+  font-size:13px;
+  color: var(--text-soft);
+  margin-top:10px;
+}
+
+/* ===== MOOD ===== */
+.mood-row{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  margin: 18px 0 8px;
+}
+.mood-row button{
+  padding: 14px 6px;
+  font-size: 26px;
+  margin: 0;
+  flex:1;
+  background: var(--panel);
+}
+.mood-label{
+  font-size:11px;
+  color: var(--text-soft);
+  display:block;
+  margin-top:6px;
+  font-weight:400;
+}
+
+/* ===== HELP PANEL ===== */
+.help-panel{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+  animation: fadeIn .3s ease;
+}
+.help-panel.show{ display:flex; }
+.help-card{
+  background: #1a1a24;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 24px;
+  max-width: 420px;
+  width:100%;
+  box-shadow: var(--shadow);
+  text-align:left;
+}
+.help-card h2{
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+.help-card p{ font-size:14px; color: var(--text-soft); margin-bottom: 18px; }
+.help-num{
+  display:block;
+  padding: 14px 16px;
+  margin-bottom:10px;
+  background: rgba(170,190,255,0.08);
+  border-radius: 12px;
+  text-decoration:none;
+  color: var(--text);
+  border: 1px solid rgba(170,190,255,0.15);
+  transition: background .2s;
+}
+.help-num:hover{ background: rgba(170,190,255,0.15); }
+.help-num strong{ display:block; font-size:15px; }
+.help-num span{ font-size:13px; color: var(--text-soft); }
+
+/* ===== CLICK INDICATOR ===== */
+.click-indicator{
+  position: fixed;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(170,190,255,0.5);
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(1);
+  transition: transform .25s ease, opacity .35s ease;
+  opacity: 0;
+  z-index: 300;
+}
+
+@keyframes fadeIn { from{opacity:0; transform: translateY(8px);} to{opacity:1; transform: translateY(0);} }
+@keyframes pulse  { 0%,100%{transform: scale(1); box-shadow: 0 0 0 0 rgba(170,190,255,0);} 50%{transform: scale(1.02); box-shadow: 0 0 0 8px rgba(170,190,255,0.06);} }
+
+@media (max-width: 380px){
+  h1{ font-size:1.5em; }
+  .breath-circle{ width:170px; height:170px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<button class="help-btn" data-testid="emergency-help-button" onclick="openHelp()" aria-label="Apri numeri di aiuto">Ho bisogno d'aiuto</button>
+
+<main class="app" role="main">
+
+  <!-- WELCOME -->
+  <section class="container welcome" id="welcome" aria-labelledby="welcome-title">
+    <h1 id="welcome-title">Benvenuto nel tuo spazio sicuro</h1>
+    <p class="intro" id="welcomeQuote">Qui non devi dimostrare nulla.</p>
+    <p class="block">
+      Questo è un luogo privato, anonimo e temporaneo.<br>
+      Nulla viene salvato o condiviso.
+    </p>
+    <p class="block">
+      Puoi scrivere, disegnare, parlare o respirare.<br>
+      Senza spiegazioni. Senza giudizio.
+    </p>
+    <p class="block soft">Tutto ciò che lasci qui resta solo per te.</p>
+
+    <button class="pulse" onclick="goToModes()" data-testid="enter-button">Entra</button>
+
+    <p class="disclaimer">
+      Questo spazio non sostituisce un supporto professionale.
+      È solo un posto dove fermarti un momento e respirare.
+      In caso di crisi puoi toccare in alto <strong>"Ho bisogno d'aiuto"</strong>.
+    </p>
+  </section>
+
+  <!-- MOODS -->
+  <section class="container hidden" id="modes" aria-labelledby="modes-title">
+    <h1 id="modes-title" style="font-size:1.3em;">Come ti senti adesso?</h1>
+    <p class="tiny">Facoltativo — nessuna risposta viene registrata.</p>
+    <div class="mood-row" role="group" aria-label="Come ti senti">
+      <button onclick="pickMood('😌')" aria-label="Sereno"><div>😌</div><span class="mood-label">sereno</span></button>
+      <button onclick="pickMood('😐')" aria-label="Così così"><div>😐</div><span class="mood-label">così così</span></button>
+      <button onclick="pickMood('😟')" aria-label="Preoccupato"><div>😟</div><span class="mood-label">preoccupato</span></button>
+      <button onclick="pickMood('😢')" aria-label="Triste"><div>😢</div><span class="mood-label">triste</span></button>
+      <button onclick="pickMood('😡')" aria-label="Arrabbiato"><div>😡</div><span class="mood-label">arrabbiato</span></button>
+    </div>
+
+    <p class="section-title" style="margin-top:30px;">Scegli come esprimerti</p>
+    <button onclick="openWrite()" data-testid="mode-write">Scrivi</button>
+    <button onclick="openDraw()" data-testid="mode-draw">Disegna</button>
+    <button onclick="openVoice()" id="voiceModeBtn" data-testid="mode-voice">Parla</button>
+    <button onclick="openBreath()" data-testid="mode-breath">Respira</button>
+    <button class="back" onclick="goHome()">← Indietro</button>
+  </section>
+
+  <!-- WRITE -->
+  <section class="container hidden" id="write" aria-labelledby="write-title">
+    <h1 id="write-title" style="font-size:1.3em;">Scrivi come viene</h1>
+    <textarea id="writeText" placeholder="Le tue parole..." aria-label="Area di scrittura"></textarea>
+    <p class="tiny">
+      Potrebbero comparire brevi messaggi di accompagnamento.<br>
+      Non sono risposte a ciò che scrivi.
+    </p>
+    <div id="writeSupport" class="support" role="status" aria-live="polite"></div>
+    <button onclick="release()" data-testid="release-button">Lascia andare</button>
+    <button class="subtle" onclick="eliminate()" data-testid="eliminate-button">Elimina</button>
+    <button class="back" onclick="goToModes()">← Indietro</button>
+  </section>
+
+  <!-- DRAW -->
+  <section class="container hidden" id="draw" aria-labelledby="draw-title">
+    <h1 id="draw-title" style="font-size:1.3em;">Disegna liberamente</h1>
+    <canvas id="canvas" aria-label="Area di disegno"></canvas>
+    <p class="tiny">
+      Il disegno svanisce dopo qualche secondo di quiete.<br>
+      Nessun tratto viene salvato.
+    </p>
+    <div id="drawSupport" class="support" role="status" aria-live="polite"></div>
+    <button onclick="release()">Lascia andare</button>
+    <button class="subtle" onclick="eliminate()">Elimina</button>
+    <button class="back" onclick="goToModes()">← Indietro</button>
+  </section>
+
+  <!-- VOICE -->
+  <section class="container hidden" id="voice" aria-labelledby="voice-title">
+    <h1 id="voice-title" style="font-size:1.3em;">Parla, ti ascolto</h1>
+    <p class="soft">Tieni premuto e parla</p>
+    <button id="recordBtn" data-testid="record-button">🎙 Tieni premuto</button>
+    <textarea id="transcript" placeholder="Le tue parole appariranno qui..." aria-label="Trascrizione"></textarea>
+    <p class="tiny">Il microfono funziona solo mentre premi. Nulla viene inviato online.</p>
+    <div id="voiceSupport" class="support" role="status" aria-live="polite"></div>
+    <button onclick="release()">Lascia andare</button>
+    <button class="subtle" onclick="eliminate()">Elimina</button>
+    <button class="back" onclick="goToModes()">← Indietro</button>
+  </section>
+
+  <!-- BREATH -->
+  <section class="container hidden" id="breath" aria-labelledby="breath-title">
+    <h1 id="breath-title" style="font-size:1.3em;">Respira con me</h1>
+    <div class="breath-wrap">
+      <div class="breath-circle" id="breathCircle">
+        <span class="breath-label" id="breathLabel">Inizia</span>
+      </div>
+      <div class="breath-count" id="breathCount">Tecnica 4-4-4-4 · segui il cerchio</div>
+    </div>
+    <button id="breathToggle" onclick="toggleBreath()">Inizia</button>
+    <button class="back" onclick="stopBreath(); goToModes()">← Indietro</button>
+  </section>
+
+  <!-- DONE -->
+  <section class="container hidden" id="done">
+    <h1 style="font-size:1.4em;">✿</h1>
+    <p id="doneMsg"></p>
+    <button onclick="reset()">Torna all'inizio</button>
+  </section>
+
+  <!-- ELIMINATED -->
+  <section class="container hidden" id="eliminated">
+    <h1 style="font-size:1.4em;">✿</h1>
+    <p id="elimMsg"></p>
+    <button onclick="reset()">Torna all'inizio</button>
+  </section>
+
+</main>
+
+<!-- HELP PANEL -->
+<div class="help-panel" id="helpPanel" role="dialog" aria-modal="true" aria-labelledby="help-title">
+  <div class="help-card">
+    <h2 id="help-title">Non sei solo</h2>
+    <p>Se stai vivendo un momento difficile, queste linee sono gratuite, anonime e attive:</p>
+
+    <a class="help-num" href="tel:112">
+      <strong>112 — Emergenza</strong>
+      <span>Se sei in pericolo immediato</span>
+    </a>
+    <a class="help-num" href="tel:19696">
+      <strong>19696 — Telefono Azzurro</strong>
+      <span>Per minori · 24 ore su 24 · gratuito</span>
+    </a>
+    <a class="help-num" href="tel:0223272327">
+      <strong>02 2327 2327 — Telefono Amico</strong>
+      <span>Ascolto anonimo · 10:00–24:00</span>
+    </a>
+    <a class="help-num" href="tel:800861061">
+      <strong>800 86 10 61 — Prevenzione Suicidio</strong>
+      <span>Servizio Samaritans Onlus</span>
+    </a>
+
+    <button class="back" onclick="closeHelp()" style="margin-top:16px;">Chiudi</button>
+  </div>
+</div>
+
+<div id="clickIndicator" class="click-indicator"></div>
+
+<script>
+'use strict';
+
+/* ===== UTILS ===== */
+const $ = (id) => document.getElementById(id);
+const haptic = (ms=25) => { if(navigator.vibrate) navigator.vibrate(ms); };
+
+/* ===== NAV ===== */
+const screens = ['welcome','modes','write','draw','voice','breath','done','eliminated'];
+function hideAll(){ screens.forEach(s => $(s).classList.add('hidden')); }
+function show(id){ hideAll(); $(id).classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'}); }
+function goHome(){ show('welcome'); }
+function goToModes(){ show('modes'); }
+function openWrite(){ show('write'); $('writeText').focus(); }
+function openDraw(){ show('draw'); initCanvas(); }
+function openVoice(){ show('voice'); }
+function openBreath(){ show('breath'); }
+
+/* ===== HELP PANEL ===== */
+function openHelp(){ $('helpPanel').classList.add('show'); haptic(15); }
+function closeHelp(){ $('helpPanel').classList.remove('show'); }
+$('helpPanel').addEventListener('click', e => { if(e.target === $('helpPanel')) closeHelp(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeHelp(); });
+
+/* ===== WELCOME RANDOM QUOTES ===== */
+const welcomeQuotes = [
+  "Qui non devi dimostrare nulla.",
+  "Puoi restare quanto ti serve.",
+  "Nessuno sta guardando.",
+  "Fai un respiro. Sei arrivato.",
+  "Il tempo qui è tuo.",
+  "Non c'è niente da spiegare.",
+  "Puoi essere te stesso, senza filtro."
+];
+$('welcomeQuote').textContent = welcomeQuotes[Math.floor(Math.random()*welcomeQuotes.length)];
+
+/* ===== MOOD (solo UI, mai salvato) ===== */
+let currentMood = null;
+function pickMood(m){
+  currentMood = m;
+  haptic(20);
+  // piccolo feedback visivo, poi resta silente
+  document.querySelectorAll('.mood-row button').forEach(b => b.style.opacity = '0.4');
+  event.currentTarget.style.opacity = '1';
+  event.currentTarget.style.borderColor = 'rgba(170,190,255,0.4)';
+}
+
+/* ===== MESSAGGI ===== */
+const releasedMessages = [
+  "Hai condiviso qualcosa, anche solo con te stesso.",
+  "Ogni parola lasciata andare è un piccolo sollievo.",
+  "Hai fatto spazio dentro di te.",
+  "Lasciare andare è un atto di cura.",
+  "Il fatto stesso che tu sia qui è coraggio."
+];
+const eliminatedMessages = [
+  "Hai scelto di non trattenere ciò che pesava.",
+  "Anche eliminare può essere liberatorio.",
+  "Non tutto deve restare.",
+  "Hai fatto ciò che serviva in questo momento."
+];
+const stressSupportMessages = [
+  "Sembra che tu stia portando molto peso. Qui puoi fermarti un momento.",
+  "Sentirsi stanchi o sotto pressione è umano. Non devi dimostrare nulla.",
+  "Anche solo scrivere qui è già un modo per alleggerire.",
+  "Non sei solo in quello che provi. Prenditi il tempo che ti serve."
+];
+const sadnessMessages = [
+  "Va bene sentirsi giù. Prenditi il tuo tempo per respirare.",
+  "A volte ci sentiamo tristi senza un motivo preciso. Sei al sicuro qui.",
+  "Non devi affrontare tutto da solo.",
+  "La tristezza è parte dell'essere umano. Permettiti di viverla."
+];
+const supportMessages = [
+  "Va bene cercare aiuto. Non sei solo.",
+  "Sentirsi soli può pesare. Prenditi un momento per te.",
+  "Hai il diritto di essere ascoltato. Anche solo scrivere è un modo per farlo."
+];
+const confusionMessages = [
+  "Va bene sentirsi confusi. Fai un respiro.",
+  "A volte non sapere è normale. Rallenta senza fretta.",
+  "Quando tutto sembra confuso, piccoli passi aiutano a ritrovare il centro."
+];
+const angerMessages = [
+  "La rabbia è un'emozione legittima. Qui puoi lasciarla scorrere senza fare male a nessuno.",
+  "Sentire rabbia non significa essere sbagliati. Respira, sei al sicuro qui."
+];
+
+/* Messaggio CRITICO per parole di autolesionismo o violenza */
+const criticalMessage =
+  "Quello che senti è reale e merita ascolto. " +
+  "La tua vita — e quella degli altri — vale, anche quando pesa molto. " +
+  "Se questo spazio non basta, parlare con qualcuno può aiutare davvero:<br>" +
+  '<span class="num">📞 Telefono Amico: 02 2327 2327</span><br>' +
+  '<span class="num">📞 Telefono Azzurro (minori): 19696</span><br>' +
+  '<span class="num">📞 Emergenza: 112</span>';
+
+const rnd = arr => arr[Math.floor(Math.random()*arr.length)];
+
+/* ===== RELEASE / ELIMINATE ===== */
+function release(){
+  haptic(30);
+  document.querySelectorAll('textarea').forEach(t => { t.style.transition='opacity .6s'; t.style.opacity=0; });
+  setTimeout(() => {
+    show('done');
+    $('doneMsg').innerHTML = rnd(releasedMessages);
+    clearAll();
+  }, 600);
+}
+function eliminate(){
+  haptic(30);
+  show('eliminated');
+  $('elimMsg').innerHTML = rnd(eliminatedMessages);
+  clearAll();
+}
+function clearAll(){
+  document.querySelectorAll('textarea').forEach(t => { t.value=''; t.style.opacity=1; });
+  document.querySelectorAll('.support').forEach(s => { s.classList.remove('show','critical'); s.innerHTML=''; });
+  currentMood = null;
+  document.querySelectorAll('.mood-row button').forEach(b => { b.style.opacity='1'; b.style.borderColor=''; });
+}
+function reset(){ clearAll(); goHome(); }
+
+/* ===== SAFETY WORDS (regex più precise) ===== */
+const criticalPatterns = [
+  /\bsuicid/i, /\bammazzarm/i, /\bucciderm/i, /voglio\s+morire/i,
+  /non\s+voglio\s+vivere/i, /farla\s+finita/i, /farmi\s+del\s+male/i,
+  /vorrei\s+sparire/i, /meglio\s+mort[oa]/i, /togliermi\s+la\s+vita/i,
+  /finirla\s+qui/i, /non\s+ce\s+la\s+faccio\s+pi[uù]/i,
+  /\bammazz(ar|er)/i, /\buccid(er|o)/i, /gliela\s+far[oò]\s+pagare/i,
+  /lo\s+uccido/i, /fargli\s+del\s+male/i
+];
+const angerPatterns = [
+  /\brabbia\b/i, /odio\b/i, /furios/i, /incazzat/i, /\barrabbiat/i,
+  /distruggere/i, /esplod/i
+];
+const stressPatterns = [
+  /\bstress/i, /\bstanc/i, /esaust/i, /\bsfin/i, /pressione/i,
+  /sopraffatt/i, /nervos/i, /\bansi/i, /\bagit/i,
+  /non\s+respiro/i, /non\s+ce\s+la\s+faccio/i, /al\s+limite/i,
+  /troppo\s+da\s+fare/i, /mi\s+sento\s+pien/i, /mi\s+sento\s+svuotat/i
+];
+const confusionPatterns = [
+  /non\s+capisco/i, /confus/i, /mi\s+sento\s+pers/i,
+  /non\s+so\s+cosa\s+fare/i, /non\s+so\s+da\s+dove/i,
+  /sono\s+bloccat/i, /testa\s+piena/i, /non\s+riesco\s+a\s+pensare/i
+];
+const supportPatterns = [
+  /ho\s+bisogno\s+di/i, /bisogno\s+di\s+aiuto/i,
+  /non\s+so\s+con\s+chi\s+parlare/i, /mi\s+sento\s+sol[oa]/i,
+  /nessuno\s+mi\s+ascolta/i, /vorrei\s+qualcuno/i,
+  /bisogno\s+di\s+parlare/i, /essere\s+ascoltat/i,
+  /mi\s+sento\s+male/i, /sto\s+male/i
+];
+const sadnessPatterns = [
+  /\btrist/i, /\bpiango\b/i, /mi\s+sento\s+gi[uù]/i,
+  /sono\s+a\s+terra/i, /abbattut/i, /mi\s+sento\s+vuot/i,
+  /niente\s+mi\s+va/i, /non\s+ho\s+voglia\s+di\s+niente/i,
+  /demoralizzat/i, /\bdepresso\b/i, /\bdepressa\b/i
+];
+
+let lastSupportTime = 0;
+const SUPPORT_DELAY = 3500;
+
+function checkText(text, box){
+  if(!text || text.length < 3){
+    box.classList.remove('show','critical');
+    return;
+  }
+  const now = Date.now();
+  if(now - lastSupportTime < SUPPORT_DELAY) return;
+
+  const test = (patterns) => patterns.some(p => p.test(text));
+
+  let html = null, critical = false;
+  if(test(criticalPatterns)){ html = criticalMessage; critical = true; }
+  else if(test(sadnessPatterns))   html = rnd(sadnessMessages);
+  else if(test(supportPatterns))   html = rnd(supportMessages);
+  else if(test(angerPatterns))     html = rnd(angerMessages);
+  else if(test(confusionPatterns)) html = rnd(confusionMessages);
+  else if(test(stressPatterns))    html = rnd(stressSupportMessages);
+
+  if(html){
+    lastSupportTime = now;
+    box.innerHTML = html;
+    box.classList.toggle('critical', critical);
+    box.classList.add('show');
+  }
+}
+
+$('writeText').addEventListener('input', e => checkText(e.target.value, $('writeSupport')));
+
+/* ===== VOICE (con supporto touch e fallback) ===== */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let isRecording = false;
+
+if(SR){
+  recognition = new SR();
+  recognition.lang = 'it-IT';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.onerror = (e) => {
+    $('voiceSupport').innerHTML = "Il microfono non è disponibile. Puoi usare lo spazio di scrittura.";
+    $('voiceSupport').classList.add('show');
+  };
+  recognition.onresult = e => {
+    let text = '';
+    for(let i=0; i<e.results.length; i++) text += e.results[i][0].transcript;
+    $('transcript').value = text;
+    checkText(text, $('voiceSupport'));
+  };
+} else {
+  // Fallback: nascondi il pulsante Parla dalle modalità
+  const vBtn = $('voiceModeBtn');
+  if(vBtn){
+    vBtn.textContent = 'Parla (non disponibile su questo browser)';
+    vBtn.disabled = true;
+    vBtn.style.opacity = '0.4';
+  }
+}
+
+function startRec(e){
+  if(!recognition || isRecording) return;
+  e && e.preventDefault();
+  isRecording = true;
+  haptic(20);
+  $('recordBtn').classList.add('recording');
+  try { recognition.start(); } catch(err){}
+}
+function stopRec(e){
+  if(!recognition || !isRecording) return;
+  e && e.preventDefault();
+  isRecording = false;
+  $('recordBtn').classList.remove('recording');
+  try { recognition.stop(); } catch(err){}
+}
+const recBtn = $('recordBtn');
+recBtn.addEventListener('pointerdown', startRec);
+recBtn.addEventListener('pointerup', stopRec);
+recBtn.addEventListener('pointerleave', stopRec);
+recBtn.addEventListener('pointercancel', stopRec);
+
+/* ===== BREATHING ===== */
+let breathTimer = null;
+let breathRunning = false;
+let breathCycles = 0;
+
+function toggleBreath(){
+  if(breathRunning) stopBreath();
+  else startBreath();
+}
+function startBreath(){
+  breathRunning = true;
+  breathCycles = 0;
+  $('breathToggle').textContent = 'Ferma';
+  runBreathPhase('inspira', 'expand', 4000);
+}
+function stopBreath(){
+  breathRunning = false;
+  if(breathTimer) clearTimeout(breathTimer);
+  $('breathToggle').textContent = 'Inizia';
+  $('breathLabel').textContent = 'Inizia';
+  $('breathCircle').classList.remove('expand','hold','contract');
+  $('breathCount').textContent = 'Tecnica 4-4-4-4 · segui il cerchio';
+}
+function runBreathPhase(label, cls, duration){
+  if(!breathRunning) return;
+  const circle = $('breathCircle');
+  const lbl = $('breathLabel');
+  circle.classList.remove('expand','hold','contract');
+  circle.classList.add(cls);
+  lbl.textContent = label;
+  haptic(15);
+  breathTimer = setTimeout(() => {
+    if(!breathRunning) return;
+    // sequenza: inspira 4s -> trattieni 4s -> espira 4s -> pausa 4s
+    if(label === 'inspira')       runBreathPhase('trattieni', 'hold', 4000);
+    else if(label === 'trattieni') runBreathPhase('espira', 'contract', 4000);
+    else if(label === 'espira')    runBreathPhase('pausa', 'contract', 4000);
+    else {
+      breathCycles++;
+      $('breathCount').textContent = `${breathCycles} respirazione${breathCycles>1?'i':''} completata${breathCycles>1?'e':''}`;
+      runBreathPhase('inspira', 'expand', 4000);
+    }
+  }, duration);
+}
+
+/* ===== CLICK INDICATOR ===== */
+const clickIndicator = $('clickIndicator');
+document.addEventListener('pointerdown', e => {
+  if(!e.target.closest('button, .help-num')) return;
+  clickIndicator.style.left = e.clientX + 'px';
+  clickIndicator.style.top  = e.clientY + 'px';
+  clickIndicator.style.opacity = '1';
+  clickIndicator.style.transform = 'translate(-50%,-50%) scale(1.6)';
+  setTimeout(() => {
+    clickIndicator.style.opacity = '0';
+    clickIndicator.style.transform = 'translate(-50%,-50%) scale(1)';
+  }, 280);
+});
+
+/* ===== CANVAS ===== */
+const IDLE_TIME = 5000;
+const FADE_SPEED = 0.012;
+let canvasInitialized = false;
+
+function initCanvas(){
+  const c = $('canvas');
+  const ctx = c.getContext('2d');
+
+  function fit(){
+    const dpr = window.devicePixelRatio || 1;
+    c.width  = c.offsetWidth  * dpr;
+    c.height = c.offsetHeight * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  fit();
+  if(!canvasInitialized){
+    window.addEventListener('resize', fit);
+    canvasInitialized = true;
+  }
+
+  let particles = [];
+  let drawing = false;
+  let frozen = false;
+  let stopTime = null;
+  let globalAlpha = 1;
+  let lastX = 0, lastY = 0;
+  let startTime = 0, strokeCount = 0;
+  let directionChanges = 0;
+  let lastDirection = null;
+  let drawSupportShown = false;
+  let chaosSupportShown = false;
+  $('drawSupport').classList.remove('show','critical');
+
+  function getPos(e){
+    const r = c.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+  function addParticle(x,y){ particles.push({ x, y, r: 2.6 }); }
+
+  c.onpointerdown = e => {
+    drawing = true; frozen = false; stopTime = null;
+    startTime = Date.now();
+    strokeCount = 0; directionChanges = 0; lastDirection = null;
+    globalAlpha = 1;
+    const pos = getPos(e); lastX = pos.x; lastY = pos.y;
+    c.setPointerCapture(e.pointerId);
+    haptic(10);
+  };
+  c.onpointerup = e => {
+    drawing = false; stopTime = Date.now();
+    try { c.releasePointerCapture(e.pointerId); } catch(err){}
+  };
+  c.onpointerleave = () => {
+    if(drawing){ drawing = false; frozen = true; stopTime = Date.now(); }
+  };
+  c.onpointermove = e => {
+    if(!drawing) return;
+    const pos = getPos(e);
+    const dx = pos.x - lastX;
+    const dy = pos.y - lastY;
+    strokeCount++;
+    const dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+    if(lastDirection && dir !== lastDirection) directionChanges++;
+    lastDirection = dir;
+    addParticle(pos.x, pos.y);
+    lastX = pos.x; lastY = pos.y;
+    checkDrawing();
+  };
+
+  function checkDrawing(){
+    const elapsed = (Date.now() - startTime) / 1000;
+    if(!drawSupportShown && strokeCount > 300 && elapsed > 4){
+      drawSupportShown = true;
+      showDrawSupport("Sembra che tu stia scaricando molta tensione.<br>Prenderti un momento per respirare può aiutare.");
+    }
+    if(!chaosSupportShown && directionChanges > 15){
+      chaosSupportShown = true;
+      showDrawSupport("Se stai provando rabbia o confusione, respira: il tuo respiro è sempre con te.");
+    }
+  }
+  function showDrawSupport(text){
+    $('drawSupport').innerHTML = text;
+    $('drawSupport').classList.add('show');
+  }
+  function animate(){
+    ctx.clearRect(0, 0, c.width, c.height);
+    if(!drawing && stopTime && Date.now() - stopTime > IDLE_TIME) frozen = true;
+    if(frozen){
+      globalAlpha -= FADE_SPEED;
+      if(globalAlpha <= 0){ globalAlpha = 0; particles = []; frozen = false; stopTime = null; }
+    }
+    ctx.globalAlpha = globalAlpha;
+    particles.forEach(p => {
+      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3);
+      g.addColorStop(0, 'rgba(220,220,241,0.9)');
+      g.addColorStop(1, 'rgba(170,190,255,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+/* Service worker registration (per PWA offline base) */
+if('serviceWorker' in navigator){
+  // registrazione opzionale: se hosti un sw.js su root funzionerà; altrimenti no-op
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>

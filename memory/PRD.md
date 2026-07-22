@@ -64,3 +64,16 @@ Miglioramento e diffusione pubblica di "Spazio Sicuro" — web app anonima per a
 
 ## Business enhancement suggerita
 Aggiungere un contatore pubblico anonimo (Plausible-based) "**Nel 2026, Spazio Sicuro ha accolto X respiri**" nella landing → dà prova sociale ai docenti/genitori senza tracciare gli utenti individualmente. Aumenta la credibilità istituzionale e crea un piccolo effetto "movimento".
+
+## Aggiornamento sessione 2 (2026-01)
+- Aggiunta sezione **Download** nella landing con 3 card scaricabili
+- Backend: nuovo endpoint `/api/downloads/{basic|full-app|pdf}` con FileResponse
+- File pubblicati in `/app/downloads/`:
+  - `spazio-sicuro-basic.zip` (11 KB) — index.html + sw.js + README
+  - `spazio-sicuro-full-app.zip` (68 KB) — progetto React + FastAPI, esclusi node_modules
+  - `spazio-sicuro-presentazione.pdf` (9 KB)
+- Link diretti (usare dominio proprio quando disponibile):
+  - {BACKEND_URL}/api/downloads/basic
+  - {BACKEND_URL}/api/downloads/full-app
+  - {BACKEND_URL}/api/downloads/pdf
+- Aggiunto "Download" al nav

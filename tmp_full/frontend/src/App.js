@@ -4,8 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   PenLine, Palette, Mic, Wind,
   Shield, Heart, School, Phone,
-  LifeBuoy, Plus, Minus, ArrowRight, Send, Check, X, Menu,
-  Download, FileText, Code2, Package
+  LifeBuoy, Plus, Minus, ArrowRight, Send, Check, X, Menu
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -29,7 +28,6 @@ function Nav({ onOpenHelp }) {
     { href: "#genitori",   label: "Genitori" },
     { href: "#scuole",     label: "Scuole" },
     { href: "#privacy",    label: "Privacy" },
-    { href: "#download",   label: "Download" },
     { href: "#faq",        label: "FAQ" },
     { href: "#contatti",   label: "Contatti" }
   ];
@@ -340,94 +338,6 @@ function Emergency() {
   );
 }
 
-// ---------- DOWNLOADS ----------
-function Downloads() {
-  const files = [
-    {
-      key: "basic",
-      icon: Code2,
-      title: "Versione base (HTML)",
-      desc: "Il file HTML singolo migliorato + service worker per PWA. Pronto da caricare su Netlify.",
-      size: "11 KB",
-      hint: "index.html + sw.js"
-    },
-    {
-      key: "full-app",
-      icon: Package,
-      title: "Full app landing",
-      desc: "Progetto React + FastAPI + MongoDB. Include istruzioni di deploy su Netlify / Railway.",
-      size: "68 KB",
-      hint: "codice sorgente completo"
-    },
-    {
-      key: "pdf",
-      icon: FileText,
-      title: "Presentazione PDF",
-      desc: "Brochure di 4 pagine A4 in italiano. Da inoltrare a scuole, docenti, associazioni.",
-      size: "9 KB",
-      hint: "spazio-sicuro-presentazione.pdf"
-    },
-  ];
-
-  return (
-    <section id="download" className="py-24 md:py-32 border-t border-[color:var(--border)]">
-      <div className="section-container">
-        <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}
-                    className="max-w-2xl mb-16">
-          <p className="text-sm uppercase tracking-[0.2em] text-[color:var(--primary)] mb-6">Materiali</p>
-          <h2 className="font-display text-3xl md:text-5xl leading-tight mb-6">
-            Scarica tutto ciò che ti serve.
-          </h2>
-          <p className="text-lg text-[color:var(--text-secondary)] leading-relaxed">
-            Codice sorgente, versione pronta per Netlify e brochure di presentazione — tutto in un click.
-          </p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {files.map((f, i) => {
-            const Icon = f.icon;
-            return (
-              <motion.a key={f.key}
-                        href={`${API}/downloads/${f.key}`}
-                        variants={fadeUp} initial="hidden" whileInView="show"
-                        viewport={{once:true, margin:"-50px"}} transition={{delay: i * 0.1}}
-                        className="editorial-card group hover:border-[color:var(--primary)]/40 transition-colors flex flex-col"
-                        data-testid={`download-${f.key}`}>
-                <div className="flex items-start justify-between mb-6">
-                  <div className="bento-icon"><Icon size={22}/></div>
-                  <span className="text-xs text-[color:var(--text-muted)] font-mono">{f.size}</span>
-                </div>
-                <h3 className="font-display text-xl md:text-2xl mb-3">{f.title}</h3>
-                <p className="text-[color:var(--text-secondary)] leading-relaxed text-sm mb-5 flex-1">{f.desc}</p>
-                <div className="flex items-center justify-between pt-4 border-t border-[color:var(--border)]">
-                  <span className="text-xs text-[color:var(--text-muted)]">{f.hint}</span>
-                  <span className="inline-flex items-center gap-2 text-[color:var(--primary)] text-sm font-medium group-hover:gap-3 transition-all">
-                    <Download size={16}/> Scarica
-                  </span>
-                </div>
-              </motion.a>
-            );
-          })}
-        </div>
-
-        <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}
-                    className="mt-12 max-w-3xl">
-          <div className="editorial-card" style={{background:"rgba(170,190,255,0.04)"}}>
-            <p className="text-sm text-[color:var(--text-secondary)] leading-relaxed">
-              <strong className="text-[color:var(--text)]">Come usarli:</strong> se sei alle prime armi, parti dalla{" "}
-              <span className="text-[color:var(--primary)]">versione base</span> — è un unico file HTML da caricare su Netlify
-              con drag & drop (vai su <em>app.netlify.com/drop</em>). La{" "}
-              <span className="text-[color:var(--primary)]">full app</span> richiede Node.js e Python installati; è pensata
-              se vuoi crescere e pubblicare una landing istituzionale su un tuo dominio. Il{" "}
-              <span className="text-[color:var(--primary)]">PDF</span> è pronto da allegare via email.
-            </p>
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
 // ---------- FAQ ----------
 function FAQ() {
   const items = [
@@ -631,7 +541,6 @@ function App() {
         <ParentsSchools />
         <Privacy />
         <Emergency />
-        <Downloads />
         <FAQ />
         <Contact />
       </main>

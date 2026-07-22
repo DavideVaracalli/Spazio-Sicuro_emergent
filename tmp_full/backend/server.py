@@ -1,5 +1,4 @@
 from fastapi import FastAPI, APIRouter, HTTPException
-from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -10,8 +9,6 @@ from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import Optional
 import uuid
 from datetime import datetime, timezone
-
-DOWNLOADS_DIR = Path(__file__).parent.parent / "downloads"
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -67,29 +64,6 @@ async def create_contact(payload: ContactCreate):
         logger.error(f"Error saving contact: {e}")
         raise HTTPException(status_code=500, detail="Errore nel salvataggio")
     return ContactResponse(id=contact.id, created_at=doc['created_at'])
-
-
-# ---------- Downloads ----------
-DOWNLOAD_FILES = {
-    "basic":       ("spazio-sicuro-basic.zip",         "application/zip"),
-    "full-app":    ("spazio-sicuro-full-app.zip",      "application/zip"),
-    "pdf":         ("spazio-sicuro-presentazione.pdf", "application/pdf"),
-}
-
-
-@api_router.get("/downloads/{key}")
-async def download_file(key: str):
-    if key not in DOWNLOAD_FILES:
-        raise HTTPException(status_code=404, detail="File non trovato")
-    filename, media_type = DOWNLOAD_FILES[key]
-    path = DOWNLOADS_DIR / filename
-    if not path.exists():
-        raise HTTPException(status_code=404, detail="File non ancora disponibile")
-    return FileResponse(
-        path=str(path),
-        media_type=media_type,
-        filename=filename,
-    )
 
 
 app.include_router(api_router)
