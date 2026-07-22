@@ -389,6 +389,9 @@ function Downloads() {
             return (
               <motion.a key={f.key}
                         href={`${API}/downloads/${f.key}`}
+                        download
+                        target="_blank"
+                        rel="noopener noreferrer"
                         variants={fadeUp} initial="hidden" whileInView="show"
                         viewport={{once:true, margin:"-50px"}} transition={{delay: i * 0.1}}
                         className="editorial-card group hover:border-[color:var(--primary)]/40 transition-colors flex flex-col"
