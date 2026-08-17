@@ -26,7 +26,6 @@ const NAV_LINKS = [
   { href: "#genitori",   label: "Genitori" },
   { href: "#scuole",     label: "Scuole" },
   { href: "#privacy",    label: "Privacy" },
-  { href: "#download",   label: "Download" },
   { href: "#faq",        label: "FAQ" },
   { href: "#contatti",   label: "Contatti" }
 ];
@@ -662,7 +661,6 @@ function App() {
         <ParentsSchools />
         <Privacy />
         <Emergency />
-        <Downloads />
         <FAQ />
         <Contact />
       </main>
