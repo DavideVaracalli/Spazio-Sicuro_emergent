@@ -1,0 +1,44 @@
+{
+  "summary": "Post-refactor regression testing of 'Spazio Sicuro' landing (backend + frontend). Backend: created pytest suite (16 tests) covering /api/, /api/health, /api/contact (valid, minimal, empty optional strings, 6 validation cases) and /api/downloads (basic, full-app, pdf, pdf-full, invalid) - 16/16 passed, MongoDB persistence verified directly (contacts collection contains the created docs, no _id leaked in responses). Frontend: Playwright E2E on desktop 1920x1080 and mobile 390x844 - hero, 8 desktop nav links + 'Entra' CTA (href https://sweet-babka-6fe1eb.netlify.app/, target=_blank), anchor scroll navigation, 4 mode cards (Scrivi/Disegna/Parla/Respira with icons), Per Genitori (3 checkmarks) + Per Scuole, 4 emergency tel: links (tel:112, tel:19696, tel:0223272327, tel:800861061), 3 download cards + REAL file download (spazio-sicuro-basic.zip downloaded successfully), FAQ 6 items with single-open accordion (open/switch/close verified via aria-expanded), contact form success ('Grazie. Ti risponderemo appena possibile.' + form reset), native HTML5 validation blocking empty submit, help FAB dialog with 4 numbers closing via X / outside click / Escape, mobile hamburger menu (9 links, closes on link click). No console/page errors, no horizontal overflow. No regressions found from the refactor.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "CORS middleware", "issue": "allow_credentials=True combined with default allow_origins='*' is an invalid CORS combination (browsers reject credentialed wildcard responses). Harmless today since no cookies/auth are used, but should be tightened."},
+      {"endpoint": "app shutdown", "issue": "@app.on_event('shutdown') is deprecated in modern FastAPI; migrate to lifespan context manager."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Mobile 390x844 - footer", "issues": ["The fixed 'Ho bisogno d'aiuto' FAB overlaps the footer disclaimer text 'Non sostituisce un supporto professionale.' when scrolled to the bottom; consider extra bottom padding on the footer."]},
+      {"screen": "Mobile nav menu", "issues": ["Menu link labels use --text-secondary/muted grey on near-black background - readable but low-ish contrast for small tap targets."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/conftest.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Optional: add bottom padding to the footer on mobile so the help FAB doesn't overlap the disclaimer text.",
+    "Optional cleanup: AnimatePresence in Nav wraps <NavMobile> which itself returns null when closed, so the exit (collapse) animation never plays - move the open check to the parent (<AnimatePresence>{open && <NavMobile .../>}</AnimatePresence>) as done for HelpDialog.",
+    "Optional: move `logger = logging.getLogger(__name__)` above the route definitions in server.py (currently defined at the bottom of the module) for clarity/robustness."
+  ],
+  "critical_code_review_comments": [
+    "No functional regressions detected after extraction of the 9 sub-components; keys (item.q), FAQ single-open state and HelpDialog Escape listener (deps [open, onClose]) all behave correctly.",
+    "use-toast.js useEffect deps are now [] with correct listener cleanup - no stale-state or leak issue observed.",
+    "DownloadCard uses the `download` attribute on a cross-origin URL, which browsers ignore; filename is correctly driven by the backend Content-Disposition header, so behaviour is fine."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/conftest.py"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "Created TEST_-prefixed contact documents in MongoDB collection 'contacts' (TEST_QA, TEST_Minimal, TEST_EmptyOpt, TEST_Playwright, TEST_Mobile). No delete endpoint exists, so they remain; harmless.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "Not applicable - app has no authentication",
+  "context_for_next_testing_agent": "Backend pytest suite lives at /app/backend/tests/ (conftest.py reads REACT_APP_BACKEND_URL from /app/frontend/.env). Run: cd /app/backend && python -m pytest tests/ -v --junitxml=/app/test_reports/pytest/pytest_results.xml. All 16 backend tests and all frontend flows (desktop + mobile) pass as of this iteration; only cosmetic issues remain (mobile FAB/footer overlap, mobile menu exit animation).",
+  "rca_of_the_issue": "No functional defect found. Mobile FAB/footer overlap is caused by the fixed-position .help-fab having no compensating bottom padding on the footer."
+}

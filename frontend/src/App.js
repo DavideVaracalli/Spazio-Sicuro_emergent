@@ -20,66 +20,81 @@ const fadeUp = {
   show:   { opacity: 1, y: 0, transition: { duration: 1, ease: [0.22, 1, 0.36, 1] } }
 };
 
+const NAV_LINKS = [
+  { href: "#manifesto",  label: "Manifesto" },
+  { href: "#come",       label: "Come funziona" },
+  { href: "#genitori",   label: "Genitori" },
+  { href: "#scuole",     label: "Scuole" },
+  { href: "#privacy",    label: "Privacy" },
+  { href: "#download",   label: "Download" },
+  { href: "#faq",        label: "FAQ" },
+  { href: "#contatti",   label: "Contatti" }
+];
+
+const EMERGENCY_NUMBERS = [
+  { n: "112",           l: "Emergenza",            s: "Se sei in pericolo immediato" },
+  { n: "19696",         l: "Telefono Azzurro",     s: "Per minori · 24 ore su 24 · gratuito" },
+  { n: "02 2327 2327",  l: "Telefono Amico",       s: "Ascolto anonimo · 10:00–24:00" },
+  { n: "800 86 10 61",  l: "Prevenzione Suicidio", s: "Samaritans Onlus" }
+];
+
 // ---------- NAV ----------
-function Nav({ onOpenHelp }) {
+function NavDesktop() {
+  return (
+    <nav className="hidden lg:flex items-center gap-8">
+      {NAV_LINKS.map(l => (
+        <a key={l.href} href={l.href}
+           className="text-sm text-[color:var(--text-secondary)] hover:text-[color:var(--text)] transition-colors"
+           data-testid={`nav-${l.label.toLowerCase().replace(/\s/g,'-')}`}>
+          {l.label}
+        </a>
+      ))}
+      <a href={TOOL_URL} target="_blank" rel="noopener noreferrer"
+         className="btn-primary text-sm" data-testid="nav-cta">
+        Entra <ArrowRight size={16} />
+      </a>
+    </nav>
+  );
+}
+
+function NavMobile({ onClose }) {
+  return (
+    <motion.div className="lg:hidden border-t border-[color:var(--border)]"
+      initial={{opacity:0, height:0}} animate={{opacity:1, height:"auto"}} exit={{opacity:0, height:0}}
+      transition={{duration:0.3}}
+      style={{background:"rgba(15,15,15,0.98)"}}>
+      <div className="section-container py-6 flex flex-col gap-4">
+        {NAV_LINKS.map(l => (
+          <a key={l.href} href={l.href} onClick={onClose}
+             className="text-base text-[color:var(--text-secondary)] hover:text-[color:var(--text)]">
+            {l.label}
+          </a>
+        ))}
+        <a href={TOOL_URL} target="_blank" rel="noopener noreferrer"
+           className="btn-primary text-sm w-fit mt-2">
+          Entra nello Spazio <ArrowRight size={16} />
+        </a>
+      </div>
+    </motion.div>
+  );
+}
+
+function Nav() {
   const [open, setOpen] = useState(false);
-  const links = [
-    { href: "#manifesto",  label: "Manifesto" },
-    { href: "#come",       label: "Come funziona" },
-    { href: "#genitori",   label: "Genitori" },
-    { href: "#scuole",     label: "Scuole" },
-    { href: "#privacy",    label: "Privacy" },
-    { href: "#download",   label: "Download" },
-    { href: "#faq",        label: "FAQ" },
-    { href: "#contatti",   label: "Contatti" }
-  ];
   return (
     <header className="nav-shell" data-testid="main-nav">
       <div className="section-container flex items-center justify-between py-5">
         <a href="#top" className="font-display text-xl md:text-2xl tracking-tight" data-testid="nav-logo">
           Spazio Sicuro
         </a>
-
-        <nav className="hidden lg:flex items-center gap-8">
-          {links.map(l => (
-            <a key={l.href} href={l.href}
-               className="text-sm text-[color:var(--text-secondary)] hover:text-[color:var(--text)] transition-colors"
-               data-testid={`nav-${l.label.toLowerCase().replace(/\s/g,'-')}`}>
-              {l.label}
-            </a>
-          ))}
-          <a href={TOOL_URL} target="_blank" rel="noopener noreferrer"
-             className="btn-primary text-sm" data-testid="nav-cta">
-            Entra <ArrowRight size={16} />
-          </a>
-        </nav>
-
+        <NavDesktop />
         <button className="lg:hidden text-[color:var(--text)]" onClick={() => setOpen(!open)}
                 aria-label="Menu" data-testid="menu-toggle">
           {open ? <X size={22}/> : <Menu size={22}/>}
         </button>
       </div>
-
       <AnimatePresence>
-        {open && (
-          <motion.div className="lg:hidden border-t border-[color:var(--border)]"
-            initial={{opacity:0, height:0}} animate={{opacity:1, height:"auto"}} exit={{opacity:0, height:0}}
-            transition={{duration:0.3}}
-            style={{background:"rgba(15,15,15,0.98)"}}>
-            <div className="section-container py-6 flex flex-col gap-4">
-              {links.map(l => (
-                <a key={l.href} href={l.href} onClick={() => setOpen(false)}
-                   className="text-base text-[color:var(--text-secondary)] hover:text-[color:var(--text)]">
-                  {l.label}
-                </a>
-              ))}
-              <a href={TOOL_URL} target="_blank" rel="noopener noreferrer"
-                 className="btn-primary text-sm w-fit mt-2">
-                Entra nello Spazio <ArrowRight size={16} />
-              </a>
-            </div>
-          </motion.div>
-        )}
+        {open && <NavMobile onClose={() => setOpen(false)} />}
       </AnimatePresence>
     </header>
   );
@@ -109,7 +124,6 @@ function Hero() {
             Un luogo privato dove adolescenti e giovani possono sfogarsi attraverso la scrittura,
             il disegno, la voce o il respiro. Nessuna registrazione. Nessun dato salvato.
           </p>
-
           <div className="flex flex-wrap items-center gap-4">
             <a href={TOOL_URL} target="_blank" rel="noopener noreferrer"
                className="btn-primary" data-testid="hero-cta-primary">
@@ -138,7 +152,6 @@ function Manifesto() {
               Silenzio. Ascolto.<br/>Nessuna pretesa.
             </h2>
           </motion.div>
-
           <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true, margin:"-100px"}}
                       className="lg:col-span-7 space-y-6 text-[color:var(--text-secondary)] text-lg leading-relaxed">
             <p>
@@ -165,13 +178,28 @@ function Manifesto() {
 }
 
 // ---------- COME FUNZIONA ----------
+const MODES = [
+  { icon: PenLine, title: "Scrivi",  desc: "Metti in parole ciò che pesa. Nessuno leggerà mai." },
+  { icon: Palette, title: "Disegna", desc: "Lascia che il gesto dica ciò che le parole non riescono." },
+  { icon: Mic,     title: "Parla",   desc: "La voce libera. Il microfono resta solo sul tuo dispositivo." },
+  { icon: Wind,    title: "Respira", desc: "Una respirazione guidata per ritrovare il centro." }
+];
+
+function ModeCard({ mode, index }) {
+  const Icon = mode.icon;
+  return (
+    <motion.div variants={fadeUp} initial="hidden" whileInView="show"
+                viewport={{once:true, margin:"-50px"}} transition={{delay: index * 0.1}}
+                className="editorial-card group hover:border-[color:var(--primary)]/30 transition-colors"
+                data-testid={`mode-card-${mode.title.toLowerCase()}`}>
+      <div className="bento-icon mb-6"><Icon size={22}/></div>
+      <h3 className="font-display text-2xl md:text-3xl mb-3">{mode.title}</h3>
+      <p className="text-[color:var(--text-secondary)] leading-relaxed">{mode.desc}</p>
+    </motion.div>
+  );
+}
+
 function ComeFunziona() {
-  const modes = [
-    { icon: PenLine, title: "Scrivi", desc: "Metti in parole ciò che pesa. Nessuno leggerà mai." },
-    { icon: Palette, title: "Disegna", desc: "Lascia che il gesto dica ciò che le parole non riescono." },
-    { icon: Mic,     title: "Parla",   desc: "La voce libera. Il microfono resta solo sul tuo dispositivo." },
-    { icon: Wind,    title: "Respira", desc: "Una respirazione guidata per ritrovare il centro." }
-  ];
   return (
     <section id="come" className="py-24 md:py-32 border-t border-[color:var(--border)]">
       <div className="section-container">
@@ -186,23 +214,9 @@ function ComeFunziona() {
             <em> lasciare andare</em> o <em>eliminare</em>. Tutto sparisce.
           </p>
         </motion.div>
-
         <div className="grid md:grid-cols-2 gap-6">
-          {modes.map((m, i) => {
-            const Icon = m.icon;
-            return (
-              <motion.div key={m.title} variants={fadeUp} initial="hidden" whileInView="show"
-                          viewport={{once:true, margin:"-50px"}} transition={{delay: i * 0.1}}
-                          className="editorial-card group hover:border-[color:var(--primary)]/30 transition-colors"
-                          data-testid={`mode-card-${m.title.toLowerCase()}`}>
-                <div className="bento-icon mb-6"><Icon size={22}/></div>
-                <h3 className="font-display text-2xl md:text-3xl mb-3">{m.title}</h3>
-                <p className="text-[color:var(--text-secondary)] leading-relaxed">{m.desc}</p>
-              </motion.div>
-            );
-          })}
+          {MODES.map((m, i) => <ModeCard key={m.title} mode={m} index={i} />)}
         </div>
-
         <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}
                     className="mt-16 text-center">
           <a href={TOOL_URL} target="_blank" rel="noopener noreferrer"
@@ -215,64 +229,73 @@ function ComeFunziona() {
   );
 }
 
-// ---------- GENITORI & SCUOLE ----------
+// ---------- GENITORI ----------
+function ForParents() {
+  return (
+    <div id="genitori" className="grid lg:grid-cols-12 gap-12">
+      <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}
+                  className="lg:col-span-5">
+        <div className="bento-icon mb-6"><Heart size={22}/></div>
+        <p className="text-sm uppercase tracking-[0.2em] text-[color:var(--primary)] mb-4">Per i genitori</p>
+        <h2 className="font-display text-3xl md:text-5xl leading-tight">Un supporto non invasivo.</h2>
+      </motion.div>
+      <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}
+                  className="lg:col-span-7 space-y-6 text-[color:var(--text-secondary)] text-lg leading-relaxed">
+        <p>
+          Sappiamo che è difficile essere presenti senza essere invadenti.
+          Spazio Sicuro non è un'app di monitoraggio, non raccoglie dati, non manda notifiche.
+        </p>
+        <p>
+          È semplicemente un luogo dove i vostri figli possono fermarsi, sentirsi accolti, e — se serve —
+          ricevere subito i contatti di aiuto giusti. Nulla di ciò che scrivono o dicono viene salvato o condiviso.
+        </p>
+        <ul className="space-y-3 pt-4">
+          <li className="flex gap-3 items-start"><Check size={18} className="text-[color:var(--primary)] mt-1 shrink-0"/>Nessuna registrazione, nessun account</li>
+          <li className="flex gap-3 items-start"><Check size={18} className="text-[color:var(--primary)] mt-1 shrink-0"/>Nessun dato salvato o inviato a server</li>
+          <li className="flex gap-3 items-start"><Check size={18} className="text-[color:var(--primary)] mt-1 shrink-0"/>Numeri di aiuto sempre a portata</li>
+        </ul>
+      </motion.div>
+    </div>
+  );
+}
+
+// ---------- SCUOLE ----------
+function ForSchools() {
+  return (
+    <div id="scuole" className="grid lg:grid-cols-12 gap-12">
+      <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}
+                  className="lg:col-span-5">
+        <div className="bento-icon mb-6"><School size={22}/></div>
+        <p className="text-sm uppercase tracking-[0.2em] text-[color:var(--primary)] mb-4">Per le scuole</p>
+        <h2 className="font-display text-3xl md:text-5xl leading-tight">Uno strumento di prevenzione.</h2>
+      </motion.div>
+      <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}
+                  className="lg:col-span-7 space-y-6 text-[color:var(--text-secondary)] text-lg leading-relaxed">
+        <p>
+          Spazio Sicuro può essere integrato nei progetti di benessere e prevenzione scolastica.
+          È gratuito, sicuro, e non richiede installazione: basta un link.
+        </p>
+        <p>
+          Complementa gli sportelli d'ascolto senza sostituirli: uno spazio a disposizione degli studenti
+          anche fuori dagli orari, quando l'ansia arriva alle tre di notte.
+        </p>
+        <div className="pt-4">
+          <a href="#contatti" className="btn-ghost" data-testid="scuole-cta">
+            Attiviamo una collaborazione <ArrowRight size={16}/>
+          </a>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 function ParentsSchools() {
   return (
     <section className="py-24 md:py-32 border-t border-[color:var(--border)]">
       <div className="section-container space-y-24">
-
-        <div id="genitori" className="grid lg:grid-cols-12 gap-12">
-          <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}
-                      className="lg:col-span-5">
-            <div className="bento-icon mb-6"><Heart size={22}/></div>
-            <p className="text-sm uppercase tracking-[0.2em] text-[color:var(--primary)] mb-4">Per i genitori</p>
-            <h2 className="font-display text-3xl md:text-5xl leading-tight">Un supporto non invasivo.</h2>
-          </motion.div>
-          <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}
-                      className="lg:col-span-7 space-y-6 text-[color:var(--text-secondary)] text-lg leading-relaxed">
-            <p>
-              Sappiamo che è difficile essere presenti senza essere invadenti.
-              Spazio Sicuro non è un'app di monitoraggio, non raccoglie dati, non manda notifiche.
-            </p>
-            <p>
-              È semplicemente un luogo dove i vostri figli possono fermarsi, sentirsi accolti, e — se serve —
-              ricevere subito i contatti di aiuto giusti. Nulla di ciò che scrivono o dicono viene salvato o condiviso.
-            </p>
-            <ul className="space-y-3 pt-4">
-              <li className="flex gap-3 items-start"><Check size={18} className="text-[color:var(--primary)] mt-1 shrink-0"/>Nessuna registrazione, nessun account</li>
-              <li className="flex gap-3 items-start"><Check size={18} className="text-[color:var(--primary)] mt-1 shrink-0"/>Nessun dato salvato o inviato a server</li>
-              <li className="flex gap-3 items-start"><Check size={18} className="text-[color:var(--primary)] mt-1 shrink-0"/>Numeri di aiuto sempre a portata</li>
-            </ul>
-          </motion.div>
-        </div>
-
+        <ForParents />
         <hr className="hr-soft"/>
-
-        <div id="scuole" className="grid lg:grid-cols-12 gap-12">
-          <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}
-                      className="lg:col-span-5">
-            <div className="bento-icon mb-6"><School size={22}/></div>
-            <p className="text-sm uppercase tracking-[0.2em] text-[color:var(--primary)] mb-4">Per le scuole</p>
-            <h2 className="font-display text-3xl md:text-5xl leading-tight">Uno strumento di prevenzione.</h2>
-          </motion.div>
-          <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}
-                      className="lg:col-span-7 space-y-6 text-[color:var(--text-secondary)] text-lg leading-relaxed">
-            <p>
-              Spazio Sicuro può essere integrato nei progetti di benessere e prevenzione scolastica.
-              È gratuito, sicuro, e non richiede installazione: basta un link.
-            </p>
-            <p>
-              Complementa gli sportelli d'ascolto senza sostituirli: uno spazio a disposizione degli studenti
-              anche fuori dagli orari, quando l'ansia arriva alle tre di notte.
-            </p>
-            <div className="pt-4">
-              <a href="#contatti" className="btn-ghost" data-testid="scuole-cta">
-                Attiviamo una collaborazione <ArrowRight size={16}/>
-              </a>
-            </div>
-          </motion.div>
-        </div>
-
+        <ForSchools />
       </div>
     </section>
   );
@@ -301,13 +324,20 @@ function Privacy() {
 }
 
 // ---------- EMERGENZA ----------
+function EmergencyItem({ number }) {
+  return (
+    <a href={`tel:${number.n.replace(/\s/g,'')}`}
+       className="emerg-item" data-testid={`emergency-${number.n.replace(/\s/g,'')}`}>
+      <Phone size={20} className="shrink-0 text-[#ffbaba]"/>
+      <div>
+        <div className="font-medium text-[color:var(--text)]">{number.n} · {number.l}</div>
+        <div className="text-sm text-[color:var(--text-muted)]">{number.s}</div>
+      </div>
+    </a>
+  );
+}
+
 function Emergency() {
-  const numbers = [
-    { n: "112",           l: "Emergenza",           s: "Se sei in pericolo immediato" },
-    { n: "19696",         l: "Telefono Azzurro",    s: "Per minori · 24 ore su 24 · gratuito" },
-    { n: "02 2327 2327",  l: "Telefono Amico",      s: "Ascolto anonimo · 10:00–24:00" },
-    { n: "800 86 10 61",  l: "Prevenzione Suicidio", s: "Samaritans Onlus" }
-  ];
   return (
     <section className="py-24 md:py-32 border-t border-[color:var(--border)]">
       <div className="section-container max-w-3xl">
@@ -321,18 +351,8 @@ function Emergency() {
             Se stai vivendo un momento difficile, queste linee sono gratuite, anonime e attive.
             Chiamare non è debolezza: è un atto di cura.
           </p>
-
           <div className="grid sm:grid-cols-2 gap-4">
-            {numbers.map(n => (
-              <a key={n.n} href={`tel:${n.n.replace(/\s/g,'')}`}
-                 className="emerg-item" data-testid={`emergency-${n.n.replace(/\s/g,'')}`}>
-                <Phone size={20} className="shrink-0 text-[#ffbaba]"/>
-                <div>
-                  <div className="font-medium text-[color:var(--text)]">{n.n} · {n.l}</div>
-                  <div className="text-sm text-[color:var(--text-muted)]">{n.s}</div>
-                </div>
-              </a>
-            ))}
+            {EMERGENCY_NUMBERS.map(n => <EmergencyItem key={n.n} number={n} />)}
           </div>
         </motion.div>
       </div>
@@ -341,34 +361,59 @@ function Emergency() {
 }
 
 // ---------- DOWNLOADS ----------
-function Downloads() {
-  const files = [
-    {
-      key: "basic",
-      icon: Code2,
-      title: "Versione base (HTML)",
-      desc: "Il file HTML singolo migliorato + service worker per PWA. Pronto da caricare su Netlify.",
-      size: "11 KB",
-      hint: "index.html + sw.js"
-    },
-    {
-      key: "full-app",
-      icon: Package,
-      title: "Full app landing",
-      desc: "Progetto React + FastAPI + MongoDB. Include istruzioni di deploy su Netlify / Railway.",
-      size: "68 KB",
-      hint: "codice sorgente completo"
-    },
-    {
-      key: "pdf",
-      icon: FileText,
-      title: "Presentazione PDF",
-      desc: "Brochure di 4 pagine A4 in italiano, coerente con la versione base. Da inoltrare a scuole, docenti, associazioni.",
-      size: "9 KB",
-      hint: "cucita sulla versione base"
-    },
-  ];
+const DOWNLOAD_FILES = [
+  {
+    key: "basic",
+    icon: Code2,
+    title: "Versione base (HTML)",
+    desc: "Il file HTML singolo migliorato + service worker per PWA. Pronto da caricare su Netlify.",
+    size: "11 KB",
+    hint: "index.html + sw.js"
+  },
+  {
+    key: "full-app",
+    icon: Package,
+    title: "Full app landing",
+    desc: "Progetto React + FastAPI + MongoDB. Include istruzioni di deploy su Netlify / Railway.",
+    size: "70 KB",
+    hint: "codice sorgente completo"
+  },
+  {
+    key: "pdf",
+    icon: FileText,
+    title: "Presentazione PDF",
+    desc: "Brochure di 4 pagine A4 con screenshot reali del tool. Da inoltrare a scuole, docenti, associazioni.",
+    size: "90 KB",
+    hint: "cucita sulla versione base"
+  }
+];
 
+function DownloadCard({ file, index }) {
+  const Icon = file.icon;
+  return (
+    <motion.a href={`${API}/downloads/${file.key}`}
+              download target="_blank" rel="noopener noreferrer"
+              variants={fadeUp} initial="hidden" whileInView="show"
+              viewport={{once:true, margin:"-50px"}} transition={{delay: index * 0.1}}
+              className="editorial-card group hover:border-[color:var(--primary)]/40 transition-colors flex flex-col"
+              data-testid={`download-${file.key}`}>
+      <div className="flex items-start justify-between mb-6">
+        <div className="bento-icon"><Icon size={22}/></div>
+        <span className="text-xs text-[color:var(--text-muted)] font-mono">{file.size}</span>
+      </div>
+      <h3 className="font-display text-xl md:text-2xl mb-3">{file.title}</h3>
+      <p className="text-[color:var(--text-secondary)] leading-relaxed text-sm mb-5 flex-1">{file.desc}</p>
+      <div className="flex items-center justify-between pt-4 border-t border-[color:var(--border)]">
+        <span className="text-xs text-[color:var(--text-muted)]">{file.hint}</span>
+        <span className="inline-flex items-center gap-2 text-[color:var(--primary)] text-sm font-medium group-hover:gap-3 transition-all">
+          <Download size={16}/> Scarica
+        </span>
+      </div>
+    </motion.a>
+  );
+}
+
+function Downloads() {
   return (
     <section id="download" className="py-24 md:py-32 border-t border-[color:var(--border)]">
       <div className="section-container">
@@ -382,37 +427,9 @@ function Downloads() {
             Codice sorgente, versione pronta per Netlify e brochure di presentazione — tutto in un click.
           </p>
         </motion.div>
-
         <div className="grid md:grid-cols-3 gap-6">
-          {files.map((f, i) => {
-            const Icon = f.icon;
-            return (
-              <motion.a key={f.key}
-                        href={`${API}/downloads/${f.key}`}
-                        download
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        variants={fadeUp} initial="hidden" whileInView="show"
-                        viewport={{once:true, margin:"-50px"}} transition={{delay: i * 0.1}}
-                        className="editorial-card group hover:border-[color:var(--primary)]/40 transition-colors flex flex-col"
-                        data-testid={`download-${f.key}`}>
-                <div className="flex items-start justify-between mb-6">
-                  <div className="bento-icon"><Icon size={22}/></div>
-                  <span className="text-xs text-[color:var(--text-muted)] font-mono">{f.size}</span>
-                </div>
-                <h3 className="font-display text-xl md:text-2xl mb-3">{f.title}</h3>
-                <p className="text-[color:var(--text-secondary)] leading-relaxed text-sm mb-5 flex-1">{f.desc}</p>
-                <div className="flex items-center justify-between pt-4 border-t border-[color:var(--border)]">
-                  <span className="text-xs text-[color:var(--text-muted)]">{f.hint}</span>
-                  <span className="inline-flex items-center gap-2 text-[color:var(--primary)] text-sm font-medium group-hover:gap-3 transition-all">
-                    <Download size={16}/> Scarica
-                  </span>
-                </div>
-              </motion.a>
-            );
-          })}
+          {DOWNLOAD_FILES.map((f, i) => <DownloadCard key={f.key} file={f} index={i} />)}
         </div>
-
         <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}
                     className="mt-12 max-w-3xl">
           <div className="editorial-card" style={{background:"rgba(170,190,255,0.04)"}}>
@@ -432,22 +449,46 @@ function Downloads() {
 }
 
 // ---------- FAQ ----------
+const FAQ_ITEMS = [
+  { q: "Chi c'è dietro Spazio Sicuro?",
+    a: "Un progetto indipendente nato dall'idea di offrire ai più giovani un luogo di sfogo digitale sicuro e gratuito. Non è affiliato ad aziende private e non ha scopo di lucro." },
+  { q: "L'app raccoglie dati personali?",
+    a: "No. Non c'è registrazione, non ci sono cookie di tracciamento, non salviamo nulla. Ogni sessione è temporanea." },
+  { q: "Sostituisce il supporto di uno psicologo?",
+    a: "Assolutamente no. È uno spazio di sfogo immediato, complementare al supporto professionale. In presenza di disagio intenso l'app suggerisce di rivolgersi a professionisti o linee di aiuto." },
+  { q: "Come posso portarlo nella mia scuola?",
+    a: "Basta condividere il link con studenti e docenti — non serve installazione né configurazione. Se desideri materiali di presentazione per collegi o progetti, contattaci." },
+  { q: "È adatto anche agli adulti?",
+    a: "Sì. Anche se pensato per adolescenti, l'esperienza funziona per chiunque desideri un momento di sfogo anonimo." },
+  { q: "Come posso sostenere il progetto?",
+    a: "Condividerlo con chi potrebbe averne bisogno è già molto. Per collaborazioni istituzionali o supporto strutturato, scrivici tramite il modulo di contatto." }
+];
+
+function FAQItem({ item, isOpen, onToggle }) {
+  return (
+    <div className="border-b border-[color:var(--border)]" data-testid={`faq-item-${item.q}`}>
+      <button className="w-full flex items-center justify-between py-6 text-left"
+              onClick={onToggle} aria-expanded={isOpen}>
+        <span className="font-display text-lg md:text-xl pr-4">{item.q}</span>
+        <span className="shrink-0 text-[color:var(--text-secondary)]">
+          {isOpen ? <Minus size={20}/> : <Plus size={20}/>}
+        </span>
+      </button>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div initial={{height:0, opacity:0}} animate={{height:"auto", opacity:1}}
+                      exit={{height:0, opacity:0}} transition={{duration:0.4, ease:[0.22,1,0.36,1]}}
+                      className="overflow-hidden">
+            <p className="pb-6 text-[color:var(--text-secondary)] leading-relaxed">{item.a}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function FAQ() {
-  const items = [
-    { q: "Chi c'è dietro Spazio Sicuro?",
-      a: "Un progetto indipendente nato dall'idea di offrire ai più giovani un luogo di sfogo digitale sicuro e gratuito. Non è affiliato ad aziende private e non ha scopo di lucro." },
-    { q: "L'app raccoglie dati personali?",
-      a: "No. Non c'è registrazione, non ci sono cookie di tracciamento, non salviamo nulla. Ogni sessione è temporanea." },
-    { q: "Sostituisce il supporto di uno psicologo?",
-      a: "Assolutamente no. È uno spazio di sfogo immediato, complementare al supporto professionale. In presenza di disagio intenso l'app suggerisce di rivolgersi a professionisti o linee di aiuto." },
-    { q: "Come posso portarlo nella mia scuola?",
-      a: "Basta condividere il link con studenti e docenti — non serve installazione né configurazione. Se desideri materiali di presentazione per collegi o progetti, contattaci." },
-    { q: "È adatto anche agli adulti?",
-      a: "Sì. Anche se pensato per adolescenti, l'esperienza funziona per chiunque desideri un momento di sfogo anonimo." },
-    { q: "Come posso sostenere il progetto?",
-      a: "Condividerlo con chi potrebbe averne bisogno è già molto. Per collaborazioni istituzionali o supporto strutturato, scrivici tramite il modulo di contatto." }
-  ];
-  const [open, setOpen] = useState(null);
+  const [openKey, setOpenKey] = useState(null);
   return (
     <section id="faq" className="py-24 md:py-32 border-t border-[color:var(--border)]">
       <div className="section-container max-w-3xl">
@@ -456,30 +497,11 @@ function FAQ() {
           <h2 className="font-display text-3xl md:text-5xl leading-tight mb-12">FAQ</h2>
         </motion.div>
         <div>
-          {items.map((it, i) => {
-            const isOpen = open === i;
-            return (
-              <div key={i} className="border-b border-[color:var(--border)]" data-testid={`faq-item-${i}`}>
-                <button className="w-full flex items-center justify-between py-6 text-left"
-                        onClick={() => setOpen(isOpen ? null : i)}
-                        aria-expanded={isOpen}>
-                  <span className="font-display text-lg md:text-xl pr-4">{it.q}</span>
-                  <span className="shrink-0 text-[color:var(--text-secondary)]">
-                    {isOpen ? <Minus size={20}/> : <Plus size={20}/>}
-                  </span>
-                </button>
-                <AnimatePresence initial={false}>
-                  {isOpen && (
-                    <motion.div initial={{height:0, opacity:0}} animate={{height:"auto", opacity:1}}
-                                exit={{height:0, opacity:0}} transition={{duration:0.4, ease:[0.22,1,0.36,1]}}
-                                className="overflow-hidden">
-                      <p className="pb-6 text-[color:var(--text-secondary)] leading-relaxed">{it.a}</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            );
-          })}
+          {FAQ_ITEMS.map(it => (
+            <FAQItem key={it.q} item={it}
+                     isOpen={openKey === it.q}
+                     onToggle={() => setOpenKey(openKey === it.q ? null : it.q)} />
+          ))}
         </div>
       </div>
     </section>
@@ -487,26 +509,57 @@ function FAQ() {
 }
 
 // ---------- CONTATTI ----------
-function Contact() {
-  const [form, setForm] = useState({ name:"", email:"", organization:"", role:"", message:"" });
-  const [status, setStatus] = useState({ state: "idle", msg: "" }); // idle | loading | success | error
+const INITIAL_CONTACT = { name:"", email:"", organization:"", role:"", message:"" };
 
-  const submit = async (e) => {
+function ContactForm({ form, onChange, onSubmit, status }) {
+  return (
+    <motion.form variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}
+                 onSubmit={onSubmit} className="grid md:grid-cols-2 gap-4" data-testid="contact-form">
+      <input required minLength={1} className="field" placeholder="Nome" value={form.name} onChange={onChange('name')} data-testid="contact-name"/>
+      <input required type="email" className="field" placeholder="Email" value={form.email} onChange={onChange('email')} data-testid="contact-email"/>
+      <input className="field" placeholder="Scuola / Associazione (facoltativo)" value={form.organization} onChange={onChange('organization')} data-testid="contact-org"/>
+      <input className="field" placeholder="Ruolo (facoltativo)" value={form.role} onChange={onChange('role')} data-testid="contact-role"/>
+      <textarea required minLength={5} className="field md:col-span-2" rows={6} placeholder="Il tuo messaggio..."
+                value={form.message} onChange={onChange('message')} data-testid="contact-message"/>
+      <div className="md:col-span-2 flex flex-wrap items-center gap-4 pt-2">
+        <button type="submit" className="btn-primary" disabled={status.state==='loading'} data-testid="contact-submit">
+          {status.state==='loading' ? 'Invio…' : (<>Invia messaggio <Send size={16}/></>)}
+        </button>
+        {status.state==='success' && (
+          <span className="text-sm text-[color:var(--primary)] flex items-center gap-2" data-testid="contact-success">
+            <Check size={16}/> {status.msg}
+          </span>
+        )}
+        {status.state==='error' && (
+          <span className="text-sm text-[#ff8a8a] flex items-center gap-2" data-testid="contact-error">
+            <X size={16}/> {status.msg}
+          </span>
+        )}
+      </div>
+    </motion.form>
+  );
+}
+
+function Contact() {
+  const [form, setForm] = useState(INITIAL_CONTACT);
+  const [status, setStatus] = useState({ state: "idle", msg: "" });
+
+  const onChange = (key) => (e) => setForm({ ...form, [key]: e.target.value });
+
+  const onSubmit = async (e) => {
     e.preventDefault();
     setStatus({state:"loading", msg:""});
     try {
       const res = await axios.post(`${API}/contact`, form);
       if (res.data && res.data.id) {
         setStatus({state:"success", msg:"Grazie. Ti risponderemo appena possibile."});
-        setForm({ name:"", email:"", organization:"", role:"", message:"" });
+        setForm(INITIAL_CONTACT);
       }
     } catch (err) {
       const detail = err?.response?.data?.detail;
       setStatus({state:"error", msg: typeof detail === 'string' ? detail : "Si è verificato un errore. Riprova."});
     }
   };
-
-  const upd = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
   return (
     <section id="contatti" className="py-24 md:py-32 border-t border-[color:var(--border)]">
@@ -521,32 +574,7 @@ function Contact() {
             o semplicemente per condividere un pensiero. Rispondiamo a tutti.
           </p>
         </motion.div>
-
-        <motion.form variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}
-                     onSubmit={submit} className="grid md:grid-cols-2 gap-4" data-testid="contact-form">
-          <input required minLength={1} className="field" placeholder="Nome" value={form.name} onChange={upd('name')} data-testid="contact-name"/>
-          <input required type="email" className="field" placeholder="Email" value={form.email} onChange={upd('email')} data-testid="contact-email"/>
-          <input className="field" placeholder="Scuola / Associazione (facoltativo)" value={form.organization} onChange={upd('organization')} data-testid="contact-org"/>
-          <input className="field" placeholder="Ruolo (facoltativo)" value={form.role} onChange={upd('role')} data-testid="contact-role"/>
-          <textarea required minLength={5} className="field md:col-span-2" rows={6} placeholder="Il tuo messaggio..."
-                    value={form.message} onChange={upd('message')} data-testid="contact-message"/>
-
-          <div className="md:col-span-2 flex flex-wrap items-center gap-4 pt-2">
-            <button type="submit" className="btn-primary" disabled={status.state==='loading'} data-testid="contact-submit">
-              {status.state==='loading' ? 'Invio…' : (<>Invia messaggio <Send size={16}/></>)}
-            </button>
-            {status.state==='success' && (
-              <span className="text-sm text-[color:var(--primary)] flex items-center gap-2" data-testid="contact-success">
-                <Check size={16}/> {status.msg}
-              </span>
-            )}
-            {status.state==='error' && (
-              <span className="text-sm text-[#ff8a8a] flex items-center gap-2" data-testid="contact-error">
-                <X size={16}/> {status.msg}
-              </span>
-            )}
-          </div>
-        </motion.form>
+        <ContactForm form={form} onChange={onChange} onSubmit={onSubmit} status={status} />
       </div>
     </section>
   );
@@ -555,7 +583,7 @@ function Contact() {
 // ---------- FOOTER ----------
 function Footer() {
   return (
-    <footer className="py-14 border-t border-[color:var(--border)]">
+    <footer className="pt-14 pb-24 md:pb-14 border-t border-[color:var(--border)]">
       <div className="section-container">
         <div className="flex flex-wrap items-start justify-between gap-8">
           <div>
@@ -576,20 +604,28 @@ function Footer() {
 }
 
 // ---------- HELP DIALOG ----------
+function HelpNumberRow({ number }) {
+  return (
+    <a href={`tel:${number.n.replace(/\s/g,'')}`} className="emerg-item">
+      <Phone size={18} className="text-[#ffbaba]"/>
+      <div>
+        <div className="font-medium">{number.n} · {number.l}</div>
+        <div className="text-xs text-[color:var(--text-muted)]">{number.s}</div>
+      </div>
+    </a>
+  );
+}
+
 function HelpDialog({ open, onClose }) {
   useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose();
-    if (open) document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    if (!open) return undefined;
+    const handleKey = (event) => { if (event.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
   }, [open, onClose]);
 
   if (!open) return null;
-  const numbers = [
-    { n: "112",           l: "Emergenza",           s: "Se sei in pericolo immediato" },
-    { n: "19696",         l: "Telefono Azzurro",    s: "Per minori · 24 ore su 24" },
-    { n: "02 2327 2327",  l: "Telefono Amico",      s: "Ascolto anonimo · 10:00–24:00" },
-    { n: "800 86 10 61",  l: "Prevenzione Suicidio", s: "Samaritans Onlus" }
-  ];
+
   return (
     <motion.div initial={{opacity:0}} animate={{opacity:1}}
                 className="fixed inset-0 z-[100] flex items-center justify-center p-4"
@@ -606,15 +642,7 @@ function HelpDialog({ open, onClose }) {
           Se stai vivendo un momento difficile, queste linee sono gratuite, anonime e attive.
         </p>
         <div className="space-y-2">
-          {numbers.map(n => (
-            <a key={n.n} href={`tel:${n.n.replace(/\s/g,'')}`} className="emerg-item">
-              <Phone size={18} className="text-[#ffbaba]"/>
-              <div>
-                <div className="font-medium">{n.n} · {n.l}</div>
-                <div className="text-xs text-[color:var(--text-muted)]">{n.s}</div>
-              </div>
-            </a>
-          ))}
+          {EMERGENCY_NUMBERS.map(n => <HelpNumberRow key={n.n} number={n} />)}
         </div>
       </motion.div>
     </motion.div>
@@ -626,7 +654,7 @@ function App() {
   const [helpOpen, setHelpOpen] = useState(false);
   return (
     <div className="min-h-screen grain">
-      <Nav onOpenHelp={() => setHelpOpen(true)} />
+      <Nav />
       <main>
         <Hero />
         <Manifesto />
