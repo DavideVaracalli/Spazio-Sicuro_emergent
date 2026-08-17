@@ -363,9 +363,9 @@ function Downloads() {
       key: "pdf",
       icon: FileText,
       title: "Presentazione PDF",
-      desc: "Brochure di 4 pagine A4 in italiano. Da inoltrare a scuole, docenti, associazioni.",
+      desc: "Brochure di 4 pagine A4 in italiano, coerente con la versione base. Da inoltrare a scuole, docenti, associazioni.",
       size: "9 KB",
-      hint: "spazio-sicuro-presentazione.pdf"
+      hint: "cucita sulla versione base"
     },
   ];
 

@@ -1,46 +1,30 @@
 """
-Generatore PDF di presentazione — Spazio Sicuro.
-Produce un PDF A4 elegante, 4 pagine, in italiano.
+PDF versione BASE — coerente visivamente con il tool single-file HTML.
+Estetica: silenzio, centralità, poco per pagina, tanto respiro.
 """
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.colors import HexColor, Color
+from reportlab.lib.colors import HexColor
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from pathlib import Path
 import os
 
-# Try registering nicer fonts. Fallback silently.
-FONTS_DIR = Path(__file__).parent / "fonts"
+BG        = HexColor("#0f0f0f")
+SURFACE   = HexColor("#1a1a2a")
+PRIMARY   = HexColor("#aabeff")
+TEXT      = HexColor("#f1f1f1")
+TEXT_SEC  = HexColor("#c8c8d4")
+TEXT_MUT  = HexColor("#8a8a9a")
+BORDER    = HexColor("#26263a")
+EMERGENCY = HexColor("#ffbaba")
+EMERG_BG  = HexColor("#2a0f0f")
 
-def _try_font(name, path):
-    try:
-        if os.path.exists(path):
-            pdfmetrics.registerFont(TTFont(name, path))
-            return True
-    except Exception:
-        return False
-    return False
-
-# System fonts fallback
-DISPLAY = "Helvetica-Bold"
+DISPLAY = "Helvetica"
+DISPLAY_B = "Helvetica-Bold"
 BODY    = "Helvetica"
 BODY_L  = "Helvetica-Oblique"
 
-# Colors
-BG        = HexColor("#0f0f0f")
-SURFACE   = HexColor("#161624")
-PRIMARY   = HexColor("#aabeff")
-TEXT      = HexColor("#f2f2f5")
-TEXT_SEC  = HexColor("#a1a1b5")
-TEXT_MUT  = HexColor("#71718a")
-BORDER    = HexColor("#2a2a3d")
-EMERGENCY = HexColor("#e57373")
-
 PAGE_W, PAGE_H = A4
-MARGIN_X = 22 * mm
-MARGIN_Y = 22 * mm
+CX = PAGE_W / 2
 
 def draw_bg(c):
     c.setFillColor(BG)
@@ -49,21 +33,18 @@ def draw_bg(c):
 def draw_footer(c, page_num, total):
     c.setFillColor(TEXT_MUT)
     c.setFont(BODY, 8)
-    c.drawString(MARGIN_X, 12*mm, "Spazio Sicuro · uno spazio anonimo per esprimere emozioni")
-    c.drawRightString(PAGE_W - MARGIN_X, 12*mm, f"{page_num} / {total}")
+    c.drawCentredString(CX, 15*mm, f"— {page_num} / {total} —")
 
-def draw_header(c, subtitle=None):
-    c.setFillColor(PRIMARY)
+def draw_top(c, label):
+    c.setFillColor(TEXT_MUT)
     c.setFont(BODY, 8)
-    c.drawString(MARGIN_X, PAGE_H - 15*mm, "SPAZIO SICURO")
-    if subtitle:
-        c.setFillColor(TEXT_MUT)
-        c.drawRightString(PAGE_W - MARGIN_X, PAGE_H - 15*mm, subtitle.upper())
+    c.drawCentredString(CX, PAGE_H - 18*mm, label.upper())
 
-def wrap_text(c, text, x, y, max_width, font, size, leading, color=TEXT):
-    """Wrap plain text respecting explicit \\n."""
+def center_wrap(c, text, y, max_width, font, size, leading, color=TEXT):
+    """Wrap text and center each line."""
     c.setFillColor(color)
     c.setFont(font, size)
+    lines = []
     for para in text.split("\n"):
         words = para.split()
         line = ""
@@ -72,13 +53,16 @@ def wrap_text(c, text, x, y, max_width, font, size, leading, color=TEXT):
             if c.stringWidth(probe, font, size) <= max_width:
                 line = probe
             else:
-                c.drawString(x, y, line)
-                y -= leading
+                lines.append(line)
                 line = w
         if line:
-            c.drawString(x, y, line)
-            y -= leading
-        y -= leading * 0.35
+            lines.append(line)
+        lines.append("")  # blank line between paragraphs
+    if lines and lines[-1] == "":
+        lines.pop()
+    for l in lines:
+        c.drawCentredString(CX, y, l)
+        y -= leading
     return y
 
 # =========================================================
@@ -87,259 +71,173 @@ def wrap_text(c, text, x, y, max_width, font, size, leading, color=TEXT):
 def page_cover(c):
     draw_bg(c)
 
-    # Subtle circle accent
-    c.setStrokeColor(HexColor("#1c1c30"))
-    c.setLineWidth(0.6)
-    c.circle(PAGE_W - 40*mm, PAGE_H - 60*mm, 55*mm, stroke=1, fill=0)
-    c.circle(PAGE_W - 40*mm, PAGE_H - 60*mm, 35*mm, stroke=1, fill=0)
+    # Sottile cerchio, come il cerchio del respiro nel tool
+    c.setStrokeColor(HexColor("#1c1c2c"))
+    c.setLineWidth(0.5)
+    c.circle(CX, PAGE_H - 90*mm, 40*mm, stroke=1, fill=0)
+    c.circle(CX, PAGE_H - 90*mm, 25*mm, stroke=1, fill=0)
 
     c.setFillColor(PRIMARY)
-    c.setFont(BODY, 9)
-    c.drawString(MARGIN_X, PAGE_H - 35*mm, "PROGETTO SOCIALE · 2026")
+    c.setFont(BODY, 8.5)
+    c.drawCentredString(CX, PAGE_H - 45*mm, "S P A Z I O   S I C U R O")
 
     c.setFillColor(TEXT)
-    c.setFont(DISPLAY, 46)
-    c.drawString(MARGIN_X, PAGE_H - 70*mm, "Spazio Sicuro")
+    c.setFont(DISPLAY, 34)
+    c.drawCentredString(CX, PAGE_H - 130*mm, "Uno spazio dove respirare,")
+    c.drawCentredString(CX, PAGE_H - 143*mm, "senza giudizio.")
 
     c.setFillColor(TEXT_SEC)
-    c.setFont(BODY_L, 16)
-    c.drawString(MARGIN_X, PAGE_H - 82*mm, "Uno spazio dove respirare, senza giudizio.")
+    c.setFont(BODY_L, 13)
+    c.drawCentredString(CX, PAGE_H - 165*mm, "un piccolo spazio digitale · anonimo · gratuito")
 
-    # Divider
-    c.setStrokeColor(BORDER)
-    c.setLineWidth(0.4)
-    c.line(MARGIN_X, PAGE_H - 100*mm, PAGE_W - MARGIN_X, PAGE_H - 100*mm)
-
-    # Description block
-    c.setFillColor(TEXT)
-    c.setFont(BODY, 11.5)
-    y = PAGE_H - 115*mm
-    text = (
-        "Spazio Sicuro è una web app anonima, gratuita e non giudicante\n"
-        "dove adolescenti e giovani possono sfogare emozioni intense\n"
-        "attraverso scrittura, disegno, voce o respirazione guidata.\n\n"
-        "Nessuna registrazione. Nessun dato salvato.\n"
-        "Solo un momento per fermarsi e respirare."
-    )
-    y = wrap_text(c, text, MARGIN_X, y, PAGE_W - 2*MARGIN_X, BODY, 11.5, 15, TEXT)
-
-    # Highlight box
-    box_y = 55*mm
+    # Al centro-basso: pulsante stilizzato come nel tool
+    btn_w, btn_h = 80*mm, 12*mm
+    btn_x = CX - btn_w/2
+    btn_y = PAGE_H - 210*mm
     c.setFillColor(SURFACE)
-    c.roundRect(MARGIN_X, box_y, PAGE_W - 2*MARGIN_X, 30*mm, 4*mm, stroke=0, fill=1)
-    c.setFillColor(PRIMARY)
-    c.setFont(BODY, 8)
-    c.drawString(MARGIN_X + 8*mm, box_y + 22*mm, "PER SCUOLE · GENITORI · EDUCATORI")
+    c.roundRect(btn_x, btn_y, btn_w, btn_h, 5*mm, stroke=0, fill=1)
     c.setFillColor(TEXT)
-    c.setFont(DISPLAY, 13)
-    c.drawString(MARGIN_X + 8*mm, box_y + 13*mm, "Uno strumento di prevenzione e benessere emotivo.")
-    c.setFillColor(TEXT_SEC)
-    c.setFont(BODY, 9.5)
-    c.drawString(MARGIN_X + 8*mm, box_y + 6*mm, "Attivabile in qualsiasi scuola con un semplice link. Gratuito, sicuro, senza installazione.")
+    c.setFont(BODY, 11)
+    c.drawCentredString(CX, btn_y + 4.5*mm, "Entra")
 
     draw_footer(c, 1, 4)
     c.showPage()
 
 # =========================================================
-# PAGE 2 — Il progetto
+# PAGE 2 — Cosa è
 # =========================================================
-def page_manifesto(c):
+def page_what(c):
     draw_bg(c)
-    draw_header(c, "Il progetto")
+    draw_top(c, "cosa è")
 
     c.setFillColor(TEXT)
-    c.setFont(DISPLAY, 24)
-    c.drawString(MARGIN_X, PAGE_H - 35*mm, "Il problema")
+    c.setFont(DISPLAY, 22)
+    c.drawCentredString(CX, PAGE_H - 55*mm, "Non è un'app.")
+    c.drawCentredString(CX, PAGE_H - 68*mm, "Non è una terapia.")
+    c.drawCentredString(CX, PAGE_H - 81*mm, "È solo un momento.")
 
-    c.setFillColor(TEXT_SEC)
-    y = PAGE_H - 45*mm
-    y = wrap_text(c,
-        "Molti adolescenti vivono emozioni intense senza avere uno spazio dove esprimerle.\n"
-        "La paura del giudizio, lo stigma della salute mentale e la difficoltà di aprirsi\n"
-        "con adulti o professionisti portano spesso a chiusura, isolamento, comportamenti\n"
-        "impulsivi. Il telefono è sempre in tasca, ma raramente offre un vero luogo di sfogo.",
-        MARGIN_X, y, PAGE_W - 2*MARGIN_X, BODY, 11, 15, TEXT_SEC)
+    y = PAGE_H - 110*mm
+    y = center_wrap(c,
+        "Una pagina web che si apre da un link.\n"
+        "Senza registrazione. Senza account.\n"
+        "Nulla viene salvato. Nulla viene inviato.\n\n"
+        "Al termine, si può lasciare andare o eliminare. Tutto sparisce.",
+        y, 130*mm, BODY, 11.5, 16, TEXT_SEC)
 
-    # Section 2
-    c.setFillColor(TEXT)
-    c.setFont(DISPLAY, 24)
-    c.drawString(MARGIN_X, y - 10*mm, "La soluzione")
-
-    y = y - 20*mm
-    y = wrap_text(c,
-        "Spazio Sicuro è una web app privata, anonima e temporanea.\n"
-        "L'utente entra senza registrazione e sceglie come esprimersi:\n"
-        "scrivendo, disegnando, parlando o respirando.\n"
-        "Al termine può \"lasciare andare\" o \"eliminare\" tutto. Nulla resta.",
-        MARGIN_X, y, PAGE_W - 2*MARGIN_X, BODY, 11, 15, TEXT_SEC)
-
-    # 4 mode boxes
-    y_box = y - 15*mm
-    box_w = (PAGE_W - 2*MARGIN_X - 12*mm) / 4
-    modes = [("Scrivi", "Mettere in parole"),
-             ("Disegna", "Gesto liberatorio"),
-             ("Parla", "Voce non registrata"),
-             ("Respira", "4-4-4-4 guidato")]
-    for i, (title, desc) in enumerate(modes):
-        x = MARGIN_X + i * (box_w + 4*mm)
+    # Elenco modalità come pulsanti verticali (come nel tool)
+    y = y - 12*mm
+    modes = [("Scrivi",  "scrivere ciò che pesa"),
+             ("Disegna", "un gesto liberatorio"),
+             ("Parla",   "dire ad alta voce"),
+             ("Respira", "respirazione guidata")]
+    btn_w, btn_h = 100*mm, 10*mm
+    for title, desc in modes:
+        bx = CX - btn_w/2
         c.setFillColor(SURFACE)
-        c.roundRect(x, y_box - 30*mm, box_w, 30*mm, 3*mm, stroke=0, fill=1)
-        c.setFillColor(PRIMARY)
-        c.setFont(DISPLAY, 14)
-        c.drawString(x + 5*mm, y_box - 10*mm, title)
+        c.roundRect(bx, y - btn_h, btn_w, btn_h, 3*mm, stroke=0, fill=1)
+        c.setFillColor(TEXT)
+        c.setFont(BODY, 11)
+        c.drawString(bx + 8*mm, y - btn_h + 3.5*mm, title)
         c.setFillColor(TEXT_MUT)
-        c.setFont(BODY, 8.5)
-        c.drawString(x + 5*mm, y_box - 17*mm, desc)
-
-    # Valore per la comunità
-    c.setFillColor(TEXT)
-    c.setFont(DISPLAY, 20)
-    c.drawString(MARGIN_X, y_box - 45*mm, "Valore per la comunità")
-
-    lines = [
-        ("Per gli adolescenti", "uno spazio di sfogo immediato, sicuro e privo di stigma."),
-        ("Per i genitori", "un supporto emotivo non invasivo, senza tracciamento."),
-        ("Per le scuole", "uno strumento di prevenzione integrabile nei progetti di benessere."),
-    ]
-    yy = y_box - 55*mm
-    for label, val in lines:
-        c.setFillColor(PRIMARY)
-        c.setFont(DISPLAY, 11)
-        c.drawString(MARGIN_X, yy, label)
-        c.setFillColor(TEXT_SEC)
-        c.setFont(BODY, 10.5)
-        c.drawString(MARGIN_X + 50*mm, yy, val)
-        yy -= 8*mm
+        c.setFont(BODY, 9)
+        c.drawRightString(bx + btn_w - 8*mm, y - btn_h + 3.5*mm, desc)
+        y -= btn_h + 3*mm
 
     draw_footer(c, 2, 4)
     c.showPage()
 
 # =========================================================
-# PAGE 3 — Privacy & Sicurezza
+# PAGE 3 — Privacy & Aiuto
 # =========================================================
 def page_privacy(c):
     draw_bg(c)
-    draw_header(c, "Privacy e responsabilità")
+    draw_top(c, "privacy")
 
     c.setFillColor(TEXT)
-    c.setFont(DISPLAY, 28)
-    c.drawString(MARGIN_X, PAGE_H - 40*mm, "Privacy assoluta.")
+    c.setFont(DISPLAY, 26)
+    c.drawCentredString(CX, PAGE_H - 55*mm, "Niente da tracciare.")
 
-    c.setFillColor(TEXT_SEC)
-    y = PAGE_H - 55*mm
-    y = wrap_text(c,
-        "Spazio Sicuro è stato progettato secondo il principio della \"privacy by design\":\n"
-        "nulla viene raccolto perché non c'è nulla da tracciare.",
-        MARGIN_X, y, PAGE_W - 2*MARGIN_X, BODY, 11, 15, TEXT_SEC)
+    y = PAGE_H - 80*mm
+    y = center_wrap(c,
+        "Non usiamo cookie.\n"
+        "Non usiamo analytics.\n"
+        "Non salviamo testi, disegni, voci.\n\n"
+        "Non c'è nulla da nascondere,\n"
+        "perché non c'è nulla da conservare.",
+        y, 130*mm, BODY, 12, 17, TEXT_SEC)
 
-    # Zero cards
-    zeros = [
-        ("Zero cookie", "Nessun cookie di tracciamento, nessuna analytics invasiva."),
-        ("Zero dati", "Nulla di ciò che l'utente scrive, disegna o dice viene salvato."),
-        ("Zero registrazione", "Non serve alcun account. Nessuna email, nessun profilo."),
+    # Sottile separatore
+    y = y - 15*mm
+    c.setStrokeColor(BORDER)
+    c.setLineWidth(0.4)
+    c.line(CX - 20*mm, y, CX + 20*mm, y)
+
+    y = y - 15*mm
+    c.setFillColor(TEXT)
+    c.setFont(DISPLAY, 16)
+    c.drawCentredString(CX, y, "Se il peso è troppo,")
+    c.drawCentredString(CX, y - 10*mm, "questi numeri esistono per te.")
+
+    # Numeri: uno per riga, centrati come i pulsanti del tool
+    y = y - 25*mm
+    numeri = [
+        ("112",            "Emergenza"),
+        ("19696",          "Telefono Azzurro · minori · 24 su 24"),
+        ("02 2327 2327",   "Telefono Amico · 10:00–24:00"),
+        ("800 86 10 61",   "Prevenzione Suicidio · Samaritans Onlus"),
     ]
-    yz = y - 10*mm
-    for label, desc in zeros:
-        c.setFillColor(SURFACE)
-        c.roundRect(MARGIN_X, yz - 18*mm, PAGE_W - 2*MARGIN_X, 16*mm, 3*mm, stroke=0, fill=1)
-        c.setFillColor(PRIMARY)
-        c.setFont(DISPLAY, 13)
-        c.drawString(MARGIN_X + 6*mm, yz - 8*mm, label)
+    for num, desc in numeri:
+        c.setFillColor(EMERG_BG)
+        bx = CX - 75*mm
+        c.roundRect(bx, y - 9*mm, 150*mm, 9*mm, 2.5*mm, stroke=0, fill=1)
+        c.setFillColor(EMERGENCY)
+        c.setFont(BODY, 10.5)
+        c.drawString(bx + 8*mm, y - 6*mm, num)
         c.setFillColor(TEXT_SEC)
-        c.setFont(BODY, 10)
-        c.drawString(MARGIN_X + 55*mm, yz - 8*mm, desc)
-        yz -= 20*mm
-
-    # Responsabilità
-    c.setFillColor(TEXT)
-    c.setFont(DISPLAY, 18)
-    c.drawString(MARGIN_X, yz - 5*mm, "Responsabilità e limiti")
-
-    y2 = yz - 15*mm
-    y2 = wrap_text(c,
-        "Spazio Sicuro non sostituisce un supporto psicologico professionale.\n"
-        "In presenza di segnali di disagio intenso, l'app riconosce automaticamente\n"
-        "parole-chiave e propone all'utente i numeri di aiuto: 112, Telefono Azzurro (19696),\n"
-        "Telefono Amico, Prevenzione Suicidio.",
-        MARGIN_X, y2, PAGE_W - 2*MARGIN_X, BODY, 10.5, 14, TEXT_SEC)
-
-    # Emergency box
-    y3 = y2 - 8*mm
-    c.setFillColor(HexColor("#2a0f0f"))
-    c.roundRect(MARGIN_X, y3 - 34*mm, PAGE_W - 2*MARGIN_X, 32*mm, 3*mm, stroke=0, fill=1)
-    c.setFillColor(EMERGENCY)
-    c.setFont(BODY, 8)
-    c.drawString(MARGIN_X + 6*mm, y3 - 7*mm, "SEMPRE ACCESSIBILI NELL'APP")
-    c.setFillColor(TEXT)
-    c.setFont(DISPLAY, 12)
-    c.drawString(MARGIN_X + 6*mm, y3 - 14*mm, "112  ·  Emergenza")
-    c.drawString(MARGIN_X + 6*mm, y3 - 20*mm, "19696  ·  Telefono Azzurro (minori)")
-    c.drawString(MARGIN_X + 6*mm, y3 - 26*mm, "02 2327 2327  ·  Telefono Amico")
-    c.drawString(MARGIN_X + 6*mm, y3 - 32*mm, "800 86 10 61  ·  Prevenzione Suicidio")
+        c.setFont(BODY, 9)
+        c.drawRightString(bx + 150*mm - 8*mm, y - 6*mm, desc)
+        y -= 12*mm
 
     draw_footer(c, 3, 4)
     c.showPage()
 
 # =========================================================
-# PAGE 4 — Adozione & Contatti
+# PAGE 4 — Chiusura & Uso
 # =========================================================
-def page_adoption(c):
+def page_close(c):
     draw_bg(c)
-    draw_header(c, "Adozione e collaborazioni")
+    draw_top(c, "come portarlo a chi ne ha bisogno")
 
     c.setFillColor(TEXT)
     c.setFont(DISPLAY, 24)
-    c.drawString(MARGIN_X, PAGE_H - 35*mm, "Come portarlo nella tua scuola.")
+    c.drawCentredString(CX, PAGE_H - 55*mm, "Basta un link.")
 
-    y = PAGE_H - 50*mm
-    steps = [
-        ("1", "Condivisione", "Basta condividere il link con studenti e docenti. Nessuna installazione."),
-        ("2", "Informazione", "Presentazione in classe o assemblea: 15 minuti bastano per introdurre lo strumento."),
-        ("3", "Integrazione", "Complementare agli sportelli d'ascolto: attivo anche fuori orario scolastico."),
-        ("4", "Feedback", "Raccogliamo insieme feedback anonimi per migliorare progressivamente."),
-    ]
-    for num, title, desc in steps:
-        c.setFillColor(PRIMARY)
-        c.setFont(DISPLAY, 18)
-        c.drawString(MARGIN_X, y, num)
-        c.setFillColor(TEXT)
-        c.setFont(DISPLAY, 13)
-        c.drawString(MARGIN_X + 12*mm, y, title)
-        c.setFillColor(TEXT_SEC)
-        c.setFont(BODY, 10)
-        c.drawString(MARGIN_X + 12*mm, y - 6*mm, desc)
-        y -= 18*mm
+    y = PAGE_H - 78*mm
+    y = center_wrap(c,
+        "Niente installazioni. Niente formazione. Niente budget.\n"
+        "Chiunque abbia una connessione può usarlo.\n\n"
+        "Puoi condividerlo con studenti, figli, colleghi.\n"
+        "Puoi presentarlo in cinque minuti.\n"
+        "Puoi lasciare che sia lì, in silenzio, per quando servirà.",
+        y, 140*mm, BODY, 11.5, 16, TEXT_SEC)
 
-    # Ambiti
+    # Sottile separatore
+    y = y - 20*mm
+    c.setStrokeColor(BORDER)
+    c.setLineWidth(0.4)
+    c.line(CX - 20*mm, y, CX + 20*mm, y)
+
+    y = y - 20*mm
     c.setFillColor(TEXT)
-    c.setFont(DISPLAY, 18)
-    c.drawString(MARGIN_X, y - 5*mm, "Ambiti di adozione")
+    c.setFont(BODY_L, 14)
+    c.drawCentredString(CX, y, "Non salviamo storie.")
+    c.setFont(BODY_L, 14)
+    c.drawCentredString(CX, y - 8*mm, "Ma qualcuno, stasera,")
+    c.drawCentredString(CX, y - 16*mm, "respirerà un po' meglio.")
 
-    yy = y - 15*mm
-    ambiti = ["Scuole secondarie di primo e secondo grado", "Servizi educativi giovanili",
-              "Centri di salute mentale", "Progetti di prevenzione e benessere emotivo",
-              "Oratori, associazioni di quartiere"]
-    for a in ambiti:
-        c.setFillColor(PRIMARY)
-        c.circle(MARGIN_X + 1*mm, yy + 1.2*mm, 0.8*mm, stroke=0, fill=1)
-        c.setFillColor(TEXT_SEC)
-        c.setFont(BODY, 10.5)
-        c.drawString(MARGIN_X + 6*mm, yy, a)
-        yy -= 6.5*mm
-
-    # Contact block
-    yc = yy - 10*mm
-    c.setFillColor(SURFACE)
-    c.roundRect(MARGIN_X, yc - 28*mm, PAGE_W - 2*MARGIN_X, 26*mm, 3*mm, stroke=0, fill=1)
     c.setFillColor(PRIMARY)
-    c.setFont(BODY, 8)
-    c.drawString(MARGIN_X + 8*mm, yc - 8*mm, "CONTATTI")
-    c.setFillColor(TEXT)
-    c.setFont(DISPLAY, 14)
-    c.drawString(MARGIN_X + 8*mm, yc - 15*mm, "Scriveteci per attivare una collaborazione.")
-    c.setFillColor(TEXT_SEC)
-    c.setFont(BODY, 10)
-    c.drawString(MARGIN_X + 8*mm, yc - 22*mm, "Attraverso il modulo sul sito · Rispondiamo a tutti.")
+    c.setFont(DISPLAY, 12)
+    c.drawCentredString(CX, y - 34*mm, "E questo è già abbastanza.")
 
     draw_footer(c, 4, 4)
     c.showPage()
@@ -347,19 +245,17 @@ def page_adoption(c):
 # =========================================================
 def build_pdf(output_path):
     c = canvas.Canvas(output_path, pagesize=A4)
-    c.setTitle("Spazio Sicuro — Presentazione")
+    c.setTitle("Spazio Sicuro")
     c.setAuthor("Spazio Sicuro")
-    c.setSubject("Presentazione del progetto")
-
+    c.setSubject("Uno spazio dove respirare, senza giudizio.")
     page_cover(c)
-    page_manifesto(c)
+    page_what(c)
     page_privacy(c)
-    page_adoption(c)
-
+    page_close(c)
     c.save()
 
 if __name__ == "__main__":
     out = "/app/spazio-sicuro-presentazione.pdf"
     build_pdf(out)
-    print(f"PDF creato: {out}")
+    print(f"PDF versione base creato: {out}")
     print(f"Dimensione: {os.path.getsize(out)/1024:.1f} KB")

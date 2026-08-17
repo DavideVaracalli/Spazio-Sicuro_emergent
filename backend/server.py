@@ -71,9 +71,10 @@ async def create_contact(payload: ContactCreate):
 
 # ---------- Downloads ----------
 DOWNLOAD_FILES = {
-    "basic":       ("spazio-sicuro-basic.zip",         "application/zip"),
-    "full-app":    ("spazio-sicuro-full-app.zip",      "application/zip"),
-    "pdf":         ("spazio-sicuro-presentazione.pdf", "application/pdf"),
+    "basic":       ("spazio-sicuro-basic.zip",              "application/zip"),
+    "full-app":    ("spazio-sicuro-full-app.zip",           "application/zip"),
+    "pdf":         ("spazio-sicuro-presentazione.pdf",      "application/pdf"),
+    "pdf-full":    ("spazio-sicuro-presentazione-full.pdf", "application/pdf"),
 }
 
 
