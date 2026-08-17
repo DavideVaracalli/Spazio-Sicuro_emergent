@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   PenLine, Palette, Mic, Wind,
   Shield, Heart, School, Phone,
-  LifeBuoy, Plus, Minus, ArrowRight, Send, Check, X, Menu,
-  Download, FileText, Code2, Package
+  LifeBuoy, Plus, Minus, ArrowRight, Send, Check, X, Menu
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Link to the existing tool on Netlify
-const TOOL_URL = "https://sweet-babka-6fe1eb.netlify.app/";
+// Link al tool esistente — cambiabile da .env quando avrai il dominio del tool
+const TOOL_URL = process.env.REACT_APP_TOOL_URL || "https://sweet-babka-6fe1eb.netlify.app/";
 
 // Fade-in animation on scroll
 const fadeUp = {
@@ -65,12 +65,13 @@ function NavMobile({ onClose }) {
       <div className="section-container py-6 flex flex-col gap-4">
         {NAV_LINKS.map(l => (
           <a key={l.href} href={l.href} onClick={onClose}
-             className="text-base text-[color:var(--text-secondary)] hover:text-[color:var(--text)]">
+             className="text-base text-[color:var(--text-secondary)] hover:text-[color:var(--text)]"
+             data-testid={`mnav-${l.label.toLowerCase().replace(/\s/g,'-')}`}>
             {l.label}
           </a>
         ))}
         <a href={TOOL_URL} target="_blank" rel="noopener noreferrer"
-           className="btn-primary text-sm w-fit mt-2">
+           className="btn-primary text-sm w-fit mt-2" data-testid="mnav-cta">
           Entra nello Spazio <ArrowRight size={16} />
         </a>
       </div>
@@ -359,94 +360,6 @@ function Emergency() {
   );
 }
 
-// ---------- DOWNLOADS ----------
-const DOWNLOAD_FILES = [
-  {
-    key: "basic",
-    icon: Code2,
-    title: "Versione base (HTML)",
-    desc: "Il file HTML singolo migliorato + service worker per PWA. Pronto da caricare su Netlify.",
-    size: "11 KB",
-    hint: "index.html + sw.js"
-  },
-  {
-    key: "full-app",
-    icon: Package,
-    title: "Full app landing",
-    desc: "Progetto React + FastAPI + MongoDB. Include istruzioni di deploy su Netlify / Railway.",
-    size: "70 KB",
-    hint: "codice sorgente completo"
-  },
-  {
-    key: "pdf",
-    icon: FileText,
-    title: "Presentazione PDF",
-    desc: "Brochure di 4 pagine A4 con screenshot reali del tool. Da inoltrare a scuole, docenti, associazioni.",
-    size: "90 KB",
-    hint: "cucita sulla versione base"
-  }
-];
-
-function DownloadCard({ file, index }) {
-  const Icon = file.icon;
-  return (
-    <motion.a href={`${API}/downloads/${file.key}`}
-              download target="_blank" rel="noopener noreferrer"
-              variants={fadeUp} initial="hidden" whileInView="show"
-              viewport={{once:true, margin:"-50px"}} transition={{delay: index * 0.1}}
-              className="editorial-card group hover:border-[color:var(--primary)]/40 transition-colors flex flex-col"
-              data-testid={`download-${file.key}`}>
-      <div className="flex items-start justify-between mb-6">
-        <div className="bento-icon"><Icon size={22}/></div>
-        <span className="text-xs text-[color:var(--text-muted)] font-mono">{file.size}</span>
-      </div>
-      <h3 className="font-display text-xl md:text-2xl mb-3">{file.title}</h3>
-      <p className="text-[color:var(--text-secondary)] leading-relaxed text-sm mb-5 flex-1">{file.desc}</p>
-      <div className="flex items-center justify-between pt-4 border-t border-[color:var(--border)]">
-        <span className="text-xs text-[color:var(--text-muted)]">{file.hint}</span>
-        <span className="inline-flex items-center gap-2 text-[color:var(--primary)] text-sm font-medium group-hover:gap-3 transition-all">
-          <Download size={16}/> Scarica
-        </span>
-      </div>
-    </motion.a>
-  );
-}
-
-function Downloads() {
-  return (
-    <section id="download" className="py-24 md:py-32 border-t border-[color:var(--border)]">
-      <div className="section-container">
-        <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}
-                    className="max-w-2xl mb-16">
-          <p className="text-sm uppercase tracking-[0.2em] text-[color:var(--primary)] mb-6">Materiali</p>
-          <h2 className="font-display text-3xl md:text-5xl leading-tight mb-6">
-            Scarica tutto ciò che ti serve.
-          </h2>
-          <p className="text-lg text-[color:var(--text-secondary)] leading-relaxed">
-            Codice sorgente, versione pronta per Netlify e brochure di presentazione — tutto in un click.
-          </p>
-        </motion.div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {DOWNLOAD_FILES.map((f, i) => <DownloadCard key={f.key} file={f} index={i} />)}
-        </div>
-        <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}
-                    className="mt-12 max-w-3xl">
-          <div className="editorial-card" style={{background:"rgba(170,190,255,0.04)"}}>
-            <p className="text-sm text-[color:var(--text-secondary)] leading-relaxed">
-              <strong className="text-[color:var(--text)]">Come usarli:</strong> se sei alle prime armi, parti dalla{" "}
-              <span className="text-[color:var(--primary)]">versione base</span> — è un unico file HTML da caricare su Netlify
-              con drag & drop (vai su <em>app.netlify.com/drop</em>). La{" "}
-              <span className="text-[color:var(--primary)]">full app</span> richiede Node.js e Python installati; è pensata
-              se vuoi crescere e pubblicare una landing istituzionale su un tuo dominio. Il{" "}
-              <span className="text-[color:var(--primary)]">PDF</span> è pronto da allegare via email.
-            </p>
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
 // ---------- FAQ ----------
 const FAQ_ITEMS = [
   { q: "Chi c'è dietro Spazio Sicuro?",
@@ -508,7 +421,7 @@ function FAQ() {
 }
 
 // ---------- CONTATTI ----------
-const INITIAL_CONTACT = { name:"", email:"", organization:"", role:"", message:"" };
+const INITIAL_CONTACT = { name:"", email:"", organization:"", role:"", message:"", website:"" };
 
 function ContactForm({ form, onChange, onSubmit, status }) {
   return (
@@ -520,6 +433,15 @@ function ContactForm({ form, onChange, onSubmit, status }) {
       <input className="field" placeholder="Ruolo (facoltativo)" value={form.role} onChange={onChange('role')} data-testid="contact-role"/>
       <textarea required minLength={5} className="field md:col-span-2" rows={6} placeholder="Il tuo messaggio..."
                 value={form.message} onChange={onChange('message')} data-testid="contact-message"/>
+
+      {/* Honeypot: campo nascosto agli umani, i bot lo compileranno e verranno scartati */}
+      <div style={{position:"absolute", left:"-9999px", width:"1px", height:"1px", overflow:"hidden"}} aria-hidden="true">
+        <label>Sito web (non compilare)
+          <input type="text" tabIndex={-1} autoComplete="off"
+                 value={form.website} onChange={onChange('website')} data-testid="contact-honeypot"/>
+        </label>
+      </div>
+
       <div className="md:col-span-2 flex flex-wrap items-center gap-4 pt-2">
         <button type="submit" className="btn-primary" disabled={status.state==='loading'} data-testid="contact-submit">
           {status.state==='loading' ? 'Invio…' : (<>Invia messaggio <Send size={16}/></>)}
@@ -592,9 +514,14 @@ function Footer() {
               Progetto sociale indipendente, senza fini di lucro.
             </p>
           </div>
-          <div className="text-sm text-[color:var(--text-muted)]">
+          <div className="text-sm text-[color:var(--text-muted)] space-y-1">
             <p>© {new Date().getFullYear()} Spazio Sicuro</p>
-            <p className="mt-1">Non sostituisce un supporto professionale.</p>
+            <p>Non sostituisce un supporto professionale.</p>
+            <p className="pt-2">
+              <Link to="/privacy" className="hover:text-[color:var(--text)] transition-colors underline underline-offset-4" data-testid="footer-privacy">
+                Privacy Policy
+              </Link>
+            </p>
           </div>
         </div>
       </div>

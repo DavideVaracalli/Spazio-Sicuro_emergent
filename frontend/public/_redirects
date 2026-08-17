@@ -1,0 +1,3 @@
+# Netlify SPA redirect: manda tutto a index.html mantenendo lo URL
+# così /privacy, /scuole/, ecc. non danno 404 quando accessi diretti.
+/*    /index.html   200

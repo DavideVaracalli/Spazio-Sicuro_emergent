@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f0f0f"/>
+      <stop offset="1" stop-color="#161624"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.2" cy="0.3" r="0.6">
+      <stop offset="0" stop-color="#aabeff" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#aabeff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- Sottili cerchi decorativi (respiro) -->
+  <circle cx="960" cy="180" r="140" fill="none" stroke="#aabeff" stroke-width="1" opacity="0.15"/>
+  <circle cx="960" cy="180" r="90"  fill="none" stroke="#aabeff" stroke-width="1" opacity="0.25"/>
+  <circle cx="960" cy="180" r="45"  fill="none" stroke="#aabeff" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Eyebrow -->
+  <text x="80" y="220" font-family="Georgia, serif" font-size="20" fill="#aabeff" letter-spacing="8">
+    SPAZIO SICURO
+  </text>
+
+  <!-- Titolo principale -->
+  <text x="80" y="330" font-family="Georgia, serif" font-size="72" fill="#f1f1f1" font-weight="500">
+    Uno spazio dove
+  </text>
+  <text x="80" y="410" font-family="Georgia, serif" font-size="72" fill="#f1f1f1" font-weight="500">
+    <tspan fill="#aabeff" font-style="italic">respirare</tspan>, senza giudizio.
+  </text>
+
+  <!-- Sottotitolo -->
+  <text x="80" y="475" font-family="Helvetica, Arial, sans-serif" font-size="24" fill="#a1a1b5">
+    Anonimo · gratuito · non giudicante
+  </text>
+
+  <!-- Footer / URL placeholder -->
+  <line x1="80" y1="540" x2="200" y2="540" stroke="#2a2a3d" stroke-width="1"/>
+  <text x="80" y="575" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="#71718a">
+    Nessuna registrazione. Nessun dato salvato.
+  </text>
+</svg>

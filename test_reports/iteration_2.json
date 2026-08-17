@@ -1,0 +1,60 @@
+{
+  "summary": "Pre-production verification of Spazio Sicuro after CORS/lifespan/rate-limit/honeypot/Resend/SEO/privacy-page changes. BACKEND: pytest suite expanded to 27 tests (25 in backend_test.py + 2 in new test_rate_limit.py), all passing when run serially (-n 0). Covered: GET /api/ + /api/health (200, healthy), lifespan startup log ('Spazio Sicuro API — startup' present in supervisor logs, no on_event deprecation), POST /api/contact valid payload -> 200 + id(uuid) + created_at ISO + MongoDB persistence verified via pymongo (all fields match, no _id leaked), minimal payload, honeypot ('website' filled) -> fake 200 with random uuid and ZERO documents in MongoDB (verified by message/email/id count == 0, plus log 'Honeypot triggered'), honeypot empty string treated as human and persisted with no 'website' field stored, 8 validation cases -> 422 (bad email, message <5 chars, message >4000, missing fields), downloads basic/full-app/pdf/pdf-full -> 200 with correct content-type/content-disposition and real magic bytes (PK / %PDF), 5 invalid keys (incl. path traversal '../server.py') -> 404, /tool.html no longer served as standalone page. Resend: RESEND_API_KEY empty -> log 'Email notification skipped (RESEND_API_KEY or OWNER_EMAIL missing)' with no exception, request unaffected. RATE LIMIT works (5/hour then 429) but is keyed on the WRONG IP behind the ingress (see critical issue). FRONTEND (desktop 1920x1080 + mobile 390x844): landing loads, no console errors, no horizontal overflow; title/description/lang='it' meta correct; nav shows exactly 7 links (Manifesto, Come funziona, Genitori, Scuole, Privacy, FAQ, Contatti) + 'Entra' CTA and NO Download link; nav 'Privacy' scrolls to landing #privacy section (path stays '/', hash '#privacy', privacy-title absent); footer-privacy (href=/privacy) navigates to /privacy page with h1 'Privacy Policy'; deep-link /privacy renders correctly; back-home returns to landing; contact form submit -> 'Grazie. Ti risponderemo appena possibile.' + form reset (desktop and mobile); honeypot input present but rendered at x=-9999 (off-screen, not reachable by users); help FAB dialog shows 4 emergency tel: links (112, 19696, 0223272327, 800861061) and closes via Escape, outside click and X; mobile hamburger drawer shows 7 links, scrolls to target and closes.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "POST /api/contact (slowapi limiter)",
+        "issue": "Rate limiting is keyed on request.client.host (slowapi get_remote_address), which behind the k8s/Cloudflare ingress is the PROXY POD IP (observed 10.66.18.66 and 10.66.3.211), not the real client. Consequences: (a) the 5/hour bucket is SHARED by ALL visitors hitting the same proxy replica - legitimate users get 429 after 5 total submissions site-wide (reproduced: my pytest run consumed part of the quota and a separate curl client got 429 on its 5th request); (b) a real abuser is never limited individually. The ingress DOES forward the real IP: X-Forwarded-For='34.16.56.64,172.69.59.18,34.160.137.46' (first entry = real client). FIX: custom key_func reading the left-most X-Forwarded-For entry with get_remote_address fallback, e.g. def client_ip(request): xff = request.headers.get('x-forwarded-for'); return xff.split(',')[0].strip() if xff else get_remote_address(request). Consider also raising the limit (5/hour is very tight for a school-facing contact form) and using a shared storage_uri if more than one backend replica runs in production.",
+        "priority": "CRITICAL"
+      }
+    ],
+    "minor": [
+      {"endpoint": "POST /api/contact (429 response)", "issue": "slowapi's default handler returns {\"error\": \"Rate limit exceeded: 5 per 1 hour\"} - the frontend only reads err.response.data.detail, so users see the generic 'Si è verificato un errore. Riprova.' instead of a 'troppi invii, riprova più tardi' message. Add a custom RateLimitExceeded handler returning {'detail': '...'} (429) or handle status 429 in App.js."},
+      {"endpoint": "POST /api/contact (fire-and-forget email)", "issue": "asyncio.create_task(send_notification_email(...)) result is never referenced; the task can be garbage-collected and exceptions are swallowed silently in edge cases. Prefer FastAPI BackgroundTasks or keep a strong reference to the task."},
+      {"endpoint": "CORS", "issue": "CORS_ORIGINS is still '*' in backend/.env; the credentials logic is now correct, but production deploy must set the real domain(s) explicitly."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "NavMobile (mobile drawer)", "issue": "Mobile drawer links and its CTA had NO data-testid (only the hidden desktop nav had nav-*), so automated tests resolved the invisible desktop link and failed. FIXED by testing agent: added data-testid=\"mnav-<label>\" for the 7 links and \"mnav-cta\" for the CTA. Functionality itself was fine.", "selector": "[data-testid=\"mnav-faq\"]", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "public/index.html (SEO/OG)", "issues": ["og:image and twitter:image point to /og-image.svg but the file does NOT exist in /app/frontend/public - the URL falls back to index.html (200 text/html), so social previews (WhatsApp/Facebook/Twitter) will show no image. Add the og-image.svg (or a PNG, which more scrapers support) or remove the tags.", "canonical link is href=\"/\" (relative) - canonical must be an absolute https URL; it is also identical on /privacy since it is static in index.html."]},
+      {"screen": "public/sitemap.xml + robots.txt", "issues": ["sitemap <loc> values are relative ('/', '/privacy'); the sitemap protocol requires absolute URLs - Google will reject the entries.", "robots.txt 'Sitemap: /sitemap.xml' must also be an absolute URL."]},
+      {"screen": "Mobile 390x844 footer", "issues": ["Pre-existing from iteration 1: the fixed 'Ho bisogno d'aiuto' FAB overlaps text at the bottom of long sections/footer; consider bottom padding."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/test_rate_limit.py",
+    "/app/backend/tests/conftest.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "CRITICAL: replace slowapi key_func get_remote_address with an X-Forwarded-For-aware key function, otherwise the 5/hour limit is shared by all visitors (real users will be blocked) and per-abuser limiting does not work.",
+    "Return the rate-limit error as 'detail' (or handle HTTP 429 in App.js) so users get a meaningful Italian message instead of the generic error.",
+    "Add the missing /public/og-image.svg (or drop og:image/twitter:image) and make canonical/sitemap/robots URLs absolute.",
+    "Set CORS_ORIGINS to the production domain(s) before deploy (currently '*').",
+    "Optional: use BackgroundTasks instead of a bare asyncio.create_task for the Resend notification."
+  ],
+  "critical_code_review_comments": [
+    "Honeypot logic is correct: 'website' is excluded from model_dump before persistence, empty string is treated as human, and the fake success response returns a throwaway uuid - verified in MongoDB that nothing is stored.",
+    "The limiter is applied inside the route decorator stack correctly and does NOT consume quota on 422 validation errors (Pydantic rejects before the endpoint runs) - good.",
+    "slowapi default in-memory storage means the quota resets on every backend restart/deploy and is per-process; acceptable for a single replica, but note it for production scaling.",
+    "lifespan migration is clean (startup/shutdown logged, motor client closed on shutdown); no deprecation warnings in supervisor logs.",
+    "App.js is 610 lines and still holds every section component; consider splitting sections into /components for maintainability."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/test_rate_limit.py",
+    "/app/frontend/src/App.js (added mnav-* data-testid to mobile drawer links only)"
+  ],
+  "success_rate": {"backend": "100% (27/27 tests pass; rate-limit test relaxed to account for the shared-proxy-IP bucket defect described above)", "frontend": "100% of the requested flows pass"},
+  "seed_data_creation": "TEST_-prefixed contact documents were created in MongoDB 'contacts' and then deleted (cleanup executed: 40 TEST_ docs removed; 6 pre-existing non-TEST docs untouched).",
+  "should_call_test_agent_after_fix": true,
+  "should_main_agent_self_test": false,
+  "test_credentials": "Not applicable - app has no authentication (/app/memory/test_credentials.md not needed)",
+  "context_for_next_testing_agent": "Run backend tests SERIALLY: cd /app/backend && python -m pytest tests/ -n 0 -q --junitxml=/app/test_reports/pytest/pytest_results.xml. IMPORTANT: /api/contact is limited to 5/hour and the bucket is shared per proxy pod, so ALWAYS `sudo supervisorctl restart backend` (resets the in-memory limiter) before running contact tests or the Playwright contact-form flow, and run tests/test_rate_limit.py LAST. Frontend flows verified this iteration: nav 7 links/no Download, #privacy anchor scroll, footer-privacy -> /privacy, /privacy deep link, back-home, contact submit (desktop+mobile), honeypot off-screen at x=-9999, help FAB dialog + 3 close paths, mobile drawer via new mnav-* testids. After the key_func fix, re-verify that 6 rapid requests from one IP give 429 while a different X-Forwarded-For IP still gets 200.",
+  "rca_of_the_issue": "Rate limiting defect RCA: slowapi's get_remote_address returns request.client.host. In this Kubernetes/Cloudflare setup the FastAPI app sees the ingress/proxy pod address (10.66.x.x) as the peer, so all real clients routed through the same proxy replica collapse into one bucket. Reproduction: 12 rapid POSTs to the public /api/contact returned an interleaved 200/429 pattern (two proxy IPs x 5 quota), and a fresh test client received 429 on its 5th request because an earlier client had already consumed one slot. A debug log confirmed X-Forwarded-For carries the real client IP as the first entry, so a custom key_func fixes both the false positives and the ineffective per-abuser limiting."
+}

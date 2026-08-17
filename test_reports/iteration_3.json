@@ -1,0 +1,47 @@
+{
+  "summary": "Backend-only retest of the 3 fixes from iteration 2 (X-Forwarded-For aware rate-limit key_func, custom RateLimitExceeded handler returning 'detail', new /public/og-image.svg). Backend restarted before each run to reset the in-memory limiter. Full pytest suite run serially: 33/33 PASS (25 in backend_test.py + 8 in the rewritten tests/test_rate_limit.py). VERIFIED: (1) Bucket separation - 5 POSTs /api/contact with X-Forwarded-For: 1.2.3.4 -> 200,200,200,200,200 and the 6th -> 429; immediately after, 5 POSTs with X-Forwarded-For: 5.6.7.8 -> all 200 (independent bucket) while 1.2.3.4 was still 429 at the same time; the 6th for 5.6.7.8 -> 429. Reproduced independently via curl with a third IP (77.77.77.77): req1-5 = 200, req6 = 429. So the shared-proxy-bucket CRITICAL defect of iteration 2 is FIXED. (2) 429 response: content-type application/json, body exactly {\"detail\": \"Hai inviato troppi messaggi. Riprova tra qualche minuto.\"} (confirmed via pytest assertion on r.json() and raw curl -i). (3) GET /og-image.svg -> 200, content-type image/svg+xml, 1933 bytes, valid <svg> root. (4) /api/health is NOT rate limited (8 consecutive 200s). REGRESSIONS OK: honeypot ('website' filled) -> fake 200 with throwaway uuid and ZERO documents in MongoDB (log 'Honeypot triggered - contact rejected (IP 9.9.9.9)' shows the new key function is used in logging too); valid submit -> 200 with only {id, created_at} and full field-by-field persistence check in MongoDB with no 'website' field and no _id leak; GET /privacy -> 200 text/html. Frontend E2E not re-run (backend-only request), but code review of App.js lines 480-481 confirms the catch block reads err?.response?.data?.detail and falls back to the generic message only when detail is not a string - so the new 429 body will be surfaced verbatim to the user. Cleanup: 30 TEST_-prefixed contact docs deleted from MongoDB; 11 remaining docs are pre-existing manual/dev entries (Test, Prof Rossi, Prof Deploy, T1..T4) left untouched. Backend restarted at the end so the limiter is clean for the main agent.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/contact (429)", "issue": "The custom rate_limit_handler drops the headers slowapi's default handler injects (Retry-After, X-RateLimit-*). Clients/crawlers have no machine-readable backoff hint. Low impact for a landing page, but easy to add: return JSONResponse(..., headers={'Retry-After': '3600'})."},
+      {"endpoint": "POST /api/contact (real_client_ip)", "issue": "real_client_ip trusts the client-supplied left-most X-Forwarded-For entry unconditionally, so the 5/hour limit is trivially bypassable by rotating the header (verified: 1.2.3.4, 5.6.7.8 and 77.77.77.77 each received a fresh 5-request quota from the same test machine). Behind Cloudflare the tamper-proof source is CF-Connecting-IP (or a fixed trusted-hop offset from the right of XFF). Acceptable for spam throttling on a landing page, but it is not an anti-abuse control."},
+      {"endpoint": "POST /api/contact (email notify)", "issue": "Still open from iteration 2: asyncio.create_task(send_notification_email(...)) is fire-and-forget with no strong reference; prefer FastAPI BackgroundTasks."},
+      {"endpoint": "CORS", "issue": "Still open: backend/.env has CORS_ORIGINS=\"*\" (allow_credentials correctly falls back to False). Must be set to the production domain(s) before deploy."},
+      {"endpoint": "rate limit storage", "issue": "In-memory limiter: quota resets on every restart/deploy and is per-process. If production runs >1 replica, buckets are per-replica (effectively 5*N/hour). Use storage_uri=redis:// if scaling."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "public/index.html (SEO/OG)", "issues": ["og-image.svg now exists and is served correctly (200 image/svg+xml), BUT og:image/twitter:image use %PUBLIC_URL%/og-image.svg which resolves to the RELATIVE '/og-image.svg' - OG/Twitter scrapers require an absolute https URL, so previews will still show no image. Use the full https://<domain>/og-image.svg. Also note many scrapers (WhatsApp, older Facebook) do not render SVG; a 1200x630 PNG/JPG is safer.", "canonical is still href=\"/\" (relative) and static across routes - must be an absolute https URL."]},
+      {"screen": "public/sitemap.xml + robots.txt", "issues": ["Still unfixed from iteration 2: sitemap <loc> values are relative ('/', '/privacy') - the sitemap protocol requires absolute URLs and Google will reject them. 'Sitemap: /sitemap.xml' in robots.txt must also be absolute."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_rate_limit.py",
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/conftest.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Before deploy: set CORS_ORIGINS to the production domain(s) instead of '*'.",
+    "Make og:image / twitter:image / canonical / sitemap <loc> / robots Sitemap absolute https URLs (og-image.svg itself is fine now); consider a PNG for wider scraper support.",
+    "Optional hardening: add Retry-After to the 429 response and prefer CF-Connecting-IP (or a trusted-hop XFF index) over the raw left-most XFF entry, since the current key can be spoofed to bypass the limit.",
+    "Optional: replace asyncio.create_task for the Resend notification with BackgroundTasks."
+  ],
+  "critical_code_review_comments": [
+    "real_client_ip is implemented correctly for its stated purpose (left-most XFF with get_remote_address fallback) and is also reused in the honeypot log line - consistent.",
+    "rate_limit_handler is registered via app.add_exception_handler(RateLimitExceeded, ...) and app.state.limiter is set; the decorator-based limiter works without SlowAPIMiddleware and verified end-to-end through the ingress.",
+    "422 validation errors still do not consume limiter quota (Pydantic rejects before the endpoint body) - good.",
+    "App.js is 610+ lines holding every section component; still worth splitting into /components before further feature work."
+  ],
+  "updated_files": ["/app/backend/tests/test_rate_limit.py"],
+  "success_rate": {"backend": "100% (33/33 pytest tests pass; all 3 iteration-2 fixes verified)", "frontend": "not tested this iteration (backend-only request); Contact catch-block verified by code review only"},
+  "seed_data_creation": "TEST_-prefixed contact docs created during the run and deleted afterwards (30 removed). 11 pre-existing non-TEST docs left untouched.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "Not applicable - app has no authentication",
+  "context_for_next_testing_agent": "Run backend tests SERIALLY after restarting backend: sudo supervisorctl restart backend && cd /app/backend && python -m pytest tests/ -n 0 -q --junitxml=/app/test_reports/pytest/pytest_results.xml. tests/test_rate_limit.py now spoofs X-Forwarded-For (1.2.3.4 / 5.6.7.8 / 9.9.9.x) so it no longer burns the real test-machine IP quota, but it still relies on a freshly restarted in-memory limiter for the first test. Rate-limit bucket separation, JSON 'detail' 429 body, og-image.svg, honeypot and valid-submit persistence are all confirmed working. Remaining open items are SEO absolute-URL fixes and CORS_ORIGINS - frontend/HTML only, no backend retest needed.",
+  "rca_of_the_issue": "No new defects. Iteration-2 RCA (slowapi get_remote_address returning the k8s/Cloudflare proxy pod IP, collapsing all visitors into one bucket) is resolved by the new real_client_ip key_func: verified that three distinct X-Forwarded-For values each hold an independent 5/hour bucket simultaneously, and that the custom handler returns the Italian 'detail' message the Contact component renders."
+}

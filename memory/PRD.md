@@ -1,79 +1,64 @@
 # PRD — Spazio Sicuro
 
 ## Original problem statement
-Miglioramento e diffusione pubblica di "Spazio Sicuro" — web app anonima per adolescenti che vivono momenti emotivi difficili (stress, tristezza, rabbia). L'utente originale ha creato una prima versione HTML su Netlify (sweet-babka-6fe1eb.netlify.app) e chiede: (1) miglioramenti al codice HTML esistente, (2) full app + landing istituzionale per scuole/genitori, (3) kit di presentazione PDF.
+Miglioramento e diffusione pubblica di "Spazio Sicuro" — web app anonima per adolescenti che vivono momenti emotivi difficili. L'utente ha creato una prima versione HTML su Netlify e chiede: (1) miglioramenti al codice HTML, (2) full app + landing istituzionale per scuole/genitori, (3) kit PDF, (4) preparazione a deploy in produzione.
 
 ## Deliverables consegnati
 ### 1. HTML migliorato (drop-in per Netlify)
-- File: `/app/spazio-sicuro-improved.html` (30 KB) + `/app/sw.js`
-- Fix: mobile touch (pointerdown/up), 100dvh, PWA installabile, safety words regex più precise, fallback SR per iOS
-- Nuove modalità: **Respira** (4-4-4-4 guidato), **Mood check-in** (5 emoji, non salvato)
-- Numeri emergenza: pulsante FAB persistente + messaggio critico con numeri cliccabili
-- Accessibilità: aria-live, aria-modal, focus visible, Esc chiude, prefers-reduced-motion
-- Aptico: vibrazione su tap importanti
+`/app/spazio-sicuro-improved.html` (30 KB) + `/app/sw.js`. Fix mobile touch, PWA, safety words regex precise, respirazione guidata, mood check-in, help FAB persistente.
 
-### 2. Full app — Landing istituzionale
-- **Frontend** (React + Tailwind + framer-motion + lucide-react + Playfair Display / Manrope)
-- **Backend** (FastAPI): endpoint `/api/contact` per collaborazioni scuole (salvato in MongoDB collection `contacts`)
-- Sezioni: Hero, Manifesto, Come funziona, Per Genitori, Per Scuole, Privacy, Numeri di aiuto, FAQ, Contatti, Footer
-- Design: "Nighttime Introspection" — dark, editorial, non-clinical
-- Floating "Ho bisogno d'aiuto" con dialog numeri emergenza
-- URL: https://youth-diary-1.preview.emergentagent.com
+### 2. Full app landing (React + FastAPI + MongoDB) — PRODUCTION-READY
+- **Frontend**: React 19 + Tailwind + framer-motion + lucide-react + react-router-dom
+- **Backend**: FastAPI + Motor + lifespan + slowapi (rate limit XFF-aware) + Resend (email)
+- **Sezioni landing**: Hero, Manifesto, Come funziona, Genitori, Scuole, Privacy, Numeri d'aiuto, FAQ, Contatti + Footer con link a /privacy
+- **Pagina /privacy**: Privacy Policy GDPR italiana completa (10 sezioni)
+- **SEO**: meta tag OG/Twitter, favicon SVG, /og-image.svg 1200x630, robots.txt, sitemap.xml, _redirects Netlify
+- **Sicurezza**: honeypot antibot su contact form, rate limit 5/hour per IP reale (X-Forwarded-For aware), CORS env-driven
+- **Notifica email**: quando arriva contatto, Resend manda email formattata al proprietario (skip silenzioso se chiavi mancanti)
 
-### 3. PDF di presentazione
-- File: `/app/spazio-sicuro-presentazione.pdf` (9 KB, 4 pagine A4)
-- Pagine: Cover, Problema/Soluzione, Privacy/Emergenza, Adozione/Contatti
-- In italiano, dark theme coerente, generato via reportlab (`scripts/generate_pdf.py`)
+### 3. PDF di presentazione (`/app/downloads/spazio-sicuro-presentazione.pdf`)
+4 pagine A4 (90 KB) con screenshot reali del tool coerenti con la versione base. Endpoint privati /api/downloads mantenuti per uso proprietario.
 
-## User personas
-- **Adolescenti (13-18)** — utenti finali del tool (accedono da mobile, no registrazione)
-- **Genitori** — visitano la landing per capire cosa fanno i figli
-- **Docenti / Scuole** — valutano adozione, compilano form contatti
-- **Professionisti** (psicologi, associazioni) — potenziali partner istituzionali
+## Environment variables da configurare per production deploy
 
-## Core requirements
-- Anonimato assoluto — mai salvare contenuti degli utenti
-- Non sostituire supporto professionale — sempre suggerire risorse
-- Numeri emergenza sempre accessibili
-- Landing credibile per istituzioni
-- Zero cost di ingresso (link condivisibile)
+### backend/.env
+```
+MONGO_URL=<mongodb-atlas-connection-string>
+DB_NAME=spazio_sicuro
+CORS_ORIGINS=https://spaziosicuro.it,https://www.spaziosicuro.it
+RESEND_API_KEY=re_xxxxxxxxxxxx  # da resend.com/api-keys (free tier 100 email/day)
+SENDER_EMAIL=noreply@spaziosicuro.it  # o "onboarding@resend.dev" prima della verifica del dominio
+OWNER_EMAIL=tua@email.it
+```
 
-## Tech stack
-- Frontend: React 19, Tailwind, framer-motion, lucide-react, Playfair Display + Manrope
-- Backend: FastAPI + Motor + MongoDB (solo per contatti scuole)
-- HTML standalone: single-file per Netlify
+### frontend/.env
+```
+REACT_APP_BACKEND_URL=https://api.spaziosicuro.it
+REACT_APP_TOOL_URL=https://spaziosicuro.it (o quello Netlify attuale)
+```
 
-## Backlog / Next actions
-### P0
-- [ ] User carica `spazio-sicuro-improved.html` (rinominato `index.html`) + `sw.js` su Netlify
-- [ ] User acquista dominio (`spaziosicuro.it` / `.org`) — consigliato Namecheap/Register.it
-- [ ] User contatta 1 psicologo per validazione clinica messaggi
+## Deploy — Passi consigliati
+1. Compra dominio (Register.it / Namecheap) ~10€/anno — es. `spaziosicuro.it`
+2. MongoDB Atlas free tier (M0) → prendi la connection string
+3. Backend su Railway/Render → env variables sopra
+4. Frontend build (`yarn build`) → deploy su Netlify (drag&drop `build/` folder o via Git)
+5. Configura DNS: apex `@` → Netlify, `api` → Railway
+6. Resend: verifica il dominio per usare `noreply@spaziosicuro.it`
+7. Google Search Console: verifica sito, submit sitemap.xml
+8. Testing produzione: submit form → deve arrivare email
 
-### P1
-- [ ] Deploy landing sul dominio (Netlify/Vercel — supportano React SPA gratis)
-- [ ] Integrazione email (SendGrid/Resend) per notifiche form contatti
-- [ ] Analytics rispettoso privacy (Plausible/Umami)
-- [ ] Privacy policy + Termini d'uso (Iubenda free tier)
+## Testing status
+- **Iteration 1**: 100% pass — 16/16 pytest backend, 100% frontend E2E
+- **Iteration 2**: 100% pass ma 1 CRITICAL (rate limit shared bucket) → risolto
+- **Iteration 3**: 100% pass — 33/33 pytest — tutti fix verificati, 0 critical issue
 
-### P2
-- [ ] Assistente AI empatico opzionale (Claude Sonnet 4.5 via Emergent Universal Key)
-- [ ] Sezione risorse/blog per docenti
-- [ ] Traduzione EN per estensione europea
-- [ ] Partnership Telefono Azzurro / Save the Children Italia
-- [ ] Candidatura bandi Fondazione Cariplo / Compagnia di San Paolo
-
-## Business enhancement suggerita
-Aggiungere un contatore pubblico anonimo (Plausible-based) "**Nel 2026, Spazio Sicuro ha accolto X respiri**" nella landing → dà prova sociale ai docenti/genitori senza tracciare gli utenti individualmente. Aumenta la credibilità istituzionale e crea un piccolo effetto "movimento".
-
-## Aggiornamento sessione 2 (2026-01)
-- Aggiunta sezione **Download** nella landing con 3 card scaricabili
-- Backend: nuovo endpoint `/api/downloads/{basic|full-app|pdf}` con FileResponse
-- File pubblicati in `/app/downloads/`:
-  - `spazio-sicuro-basic.zip` (11 KB) — index.html + sw.js + README
-  - `spazio-sicuro-full-app.zip` (68 KB) — progetto React + FastAPI, esclusi node_modules
-  - `spazio-sicuro-presentazione.pdf` (9 KB)
-- Link diretti (usare dominio proprio quando disponibile):
-  - {BACKEND_URL}/api/downloads/basic
-  - {BACKEND_URL}/api/downloads/full-app
-  - {BACKEND_URL}/api/downloads/pdf
-- Aggiunto "Download" al nav
+## Backlog / P1-P2 (dopo deploy iniziale)
+- Analytics privacy-friendly (Plausible/Umami) — placeholder già in index.html
+- Traduzione EN per estensione europea
+- Assistente AI empatico anonimo (Claude Sonnet 4.5 via Emergent LLM Key)
+- Partnership Telefono Azzurro / Save the Children Italia
+- Candidatura bandi Fondazione Cariplo / Compagnia di San Paolo (5K-30K€ tipici)
+- 5x1000 se costituisci APS
+- URL assoluti (canonical, sitemap, robots) quando dominio disponibile
+- Retry-After header su 429
+- BackgroundTasks per email Resend (invece di asyncio.create_task)
