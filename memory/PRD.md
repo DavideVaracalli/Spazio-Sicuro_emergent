@@ -69,3 +69,13 @@ REACT_APP_TOOL_URL=https://spaziosicuro.it (o quello Netlify attuale)
 - Test reale eseguito: email inviata con successo (log: "Notification email sent")
 - Verifica completa post-fork: health OK, form contatti OK (salvataggio DB), honeypot OK, download endpoints OK (basic/full-app/pdf 200), landing page OK
 - Nota free tier Resend: le email arrivano SOLO all'indirizzo di registrazione finché non si verifica un dominio; mittente = onboarding@resend.dev (controllare spam)
+
+## Aggiornamento 17/06/2026 (2) — Contatore, Auto-reply, Analytics
+- POST /api/events/{breath|visit}: contatori giornalieri aggregati anonimi (collection daily_stats, _id=data, $inc). Rate limit 15/min. Nessun IP/ID salvato.
+- GET /api/stats/public: {breaths_today, breaths_total} → mostrato nella hero della landing (componente BreathCounter, testid breath-counter, nascosto se totale=0)
+- GET /api/stats/admin?key=STATS_ADMIN_KEY: analytics privacy-friendly proprietario (visite/respiri ultimi 60gg + totali + n. contatti). Key in backend/.env: ss-stats-4e9b1c7a2f6d
+- Landing: ping visita 1x per sessione (sessionStorage, zero cookie) in App useEffect
+- spazio-sicuro-improved.html: pingBreath() via sendBeacon a fine ciclo respirazione (URL STATS_API da cambiare col dominio). Zip basic rigenerato.
+- Auto-reply: send_confirmation_email al mittente del form. NOTA: con Resend free tier funziona solo verso l'email del proprietario finché il dominio non è verificato (fallisce silenziosamente per altri, loggato come warning).
+- Test: tutti endpoint verificati via curl (204/404/403/200), counter visibile in screenshot, entrambe le email inviate con successo nei log.
+- Dominio: guida fornita all'utente. TODO quando acquistato: CORS_ORIGINS, STATS_API nell'HTML, SENDER_EMAIL con dominio verificato Resend, REACT_APP_TOOL_URL.

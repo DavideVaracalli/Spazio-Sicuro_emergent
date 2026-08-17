@@ -9,7 +9,7 @@ from typing import Optional
 
 import resend
 from dotenv import load_dotenv
-from fastapi import FastAPI, APIRouter, HTTPException, Request
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response
 from fastapi.responses import FileResponse, JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -39,6 +39,7 @@ db = client[os.environ['DB_NAME']]
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
 SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
 OWNER_EMAIL = os.environ.get('OWNER_EMAIL')
+STATS_ADMIN_KEY = os.environ.get('STATS_ADMIN_KEY')
 if RESEND_API_KEY:
     resend.api_key = RESEND_API_KEY
 
@@ -152,6 +153,42 @@ async def send_notification_email(contact: Contact) -> None:
         logger.error(f"Failed to send notification email: {e}")
 
 
+async def send_confirmation_email(contact: Contact) -> None:
+    """Email di conferma gentile a chi compila il form. Best-effort."""
+    if not RESEND_API_KEY:
+        return
+    body = f"""
+    <div style="font-family: -apple-system, sans-serif; max-width: 560px; padding: 24px; background: #f8f8fa; color: #1a1a2a;">
+      <h2 style="margin-top:0;">Grazie, {contact.name}.</h2>
+      <p style="line-height:1.6; color:#444;">
+        Abbiamo ricevuto il tuo messaggio su <strong>Spazio Sicuro</strong> e ti risponderemo al più presto.
+      </p>
+      <p style="line-height:1.6; color:#444;">
+        Spazio Sicuro è un progetto pensato per dare ad adolescenti e giovani un luogo anonimo
+        dove esprimere le proprie emozioni, senza registrazione e senza salvare alcun dato.
+      </p>
+      <p style="line-height:1.6; color:#444;">A presto,<br>Davide — Spazio Sicuro</p>
+      <hr style="border:none; border-top:1px solid #ddd; margin: 24px 0;">
+      <p style="color:#999; font-size:12px;">Questa è una risposta automatica alla tua richiesta di contatto.</p>
+    </div>
+    """
+    params = {
+        "from": SENDER_EMAIL,
+        "to": [contact.email],
+        "subject": "Abbiamo ricevuto il tuo messaggio — Spazio Sicuro",
+        "html": body,
+    }
+    try:
+        await asyncio.to_thread(resend.Emails.send, params)
+        logger.info(f"Confirmation email sent to {contact.email}")
+    except Exception as e:
+        logger.warning(f"Confirmation email failed (Resend free tier invia solo all'email del proprietario finché il dominio non è verificato): {e}")
+
+
+def today_key() -> str:
+    return datetime.now(timezone.utc).strftime('%Y-%m-%d')
+
+
 # ---------- Routes ----------
 @api_router.get("/")
 async def root():
@@ -186,10 +223,56 @@ async def create_contact(request: Request, payload: ContactCreate):
         logger.error(f"Error saving contact: {e}")
         raise HTTPException(status_code=500, detail="Errore nel salvataggio")
 
-    # Notifica email al proprietario (best-effort, non blocca la risposta)
+    # Email best-effort, non bloccano la risposta
     asyncio.create_task(send_notification_email(contact))
+    asyncio.create_task(send_confirmation_email(contact))
 
     return ContactResponse(id=contact.id, created_at=doc['created_at'])
+
+
+# ---------- Statistiche anonime (nessun dato personale, solo conteggi aggregati) ----------
+@api_router.post("/events/{event_type}", status_code=204)
+@limiter.limit("15/minute")
+async def track_event(request: Request, event_type: str):
+    """Incrementa un contatore giornaliero aggregato. Nessun IP o identificativo salvato."""
+    if event_type not in ("breath", "visit"):
+        raise HTTPException(status_code=404, detail="Evento non valido")
+    field = "breaths" if event_type == "breath" else "visits"
+    await db.daily_stats.update_one(
+        {"_id": today_key()}, {"$inc": {field: 1}}, upsert=True
+    )
+    return Response(status_code=204)
+
+
+@api_router.get("/stats/public")
+async def public_stats():
+    """Contatore pubblico per la landing: respiri di oggi e totali."""
+    today = await db.daily_stats.find_one({"_id": today_key()})
+    agg = await db.daily_stats.aggregate([
+        {"$group": {"_id": None, "breaths": {"$sum": "$breaths"}}}
+    ]).to_list(1)
+    return {
+        "breaths_today": (today or {}).get("breaths", 0),
+        "breaths_total": agg[0]["breaths"] if agg else 0,
+    }
+
+
+@api_router.get("/stats/admin")
+async def admin_stats(key: str = ""):
+    """Analytics privacy-friendly per il proprietario: aggregati giornalieri, zero cookie."""
+    if not STATS_ADMIN_KEY or key != STATS_ADMIN_KEY:
+        raise HTTPException(status_code=403, detail="Chiave non valida")
+    cursor = db.daily_stats.find().sort("_id", -1).limit(60)
+    days = [
+        {"date": d["_id"], "visits": d.get("visits", 0), "breaths": d.get("breaths", 0)}
+        async for d in cursor
+    ]
+    agg = await db.daily_stats.aggregate([
+        {"$group": {"_id": None, "visits": {"$sum": "$visits"}, "breaths": {"$sum": "$breaths"}}}
+    ]).to_list(1)
+    totals = {"visits": agg[0]["visits"], "breaths": agg[0]["breaths"]} if agg else {"visits": 0, "breaths": 0}
+    contacts_count = await db.contacts.count_documents({})
+    return {"totals": totals, "contacts_received": contacts_count, "last_days": days}
 
 
 # ---------- Downloads (endpoint privati, non linkati pubblicamente) ----------

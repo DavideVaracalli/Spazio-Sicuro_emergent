@@ -133,9 +133,31 @@ function Hero() {
               Come funziona
             </a>
           </div>
+          <BreathCounter />
         </motion.div>
       </div>
     </section>
+  );
+}
+
+// ---------- CONTATORE ANONIMO ----------
+function BreathCounter() {
+  const [stats, setStats] = useState(null);
+  useEffect(() => {
+    axios.get(`${API}/stats/public`).then(r => setStats(r.data)).catch(() => {});
+  }, []);
+  if (!stats || stats.breaths_total < 1) return null;
+  return (
+    <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{duration:1, delay:0.4}}
+              className="mt-10 flex items-center gap-2.5 text-sm text-[color:var(--text-muted)]"
+              data-testid="breath-counter">
+      <Wind size={15} className="text-[color:var(--primary)] shrink-0"/>
+      <span>
+        <strong className="text-[color:var(--text-secondary)] font-medium">{stats.breaths_today}</strong>
+        {" "}respir{stats.breaths_today === 1 ? "o fatto" : "i fatti"} oggi
+        {" "}· <strong className="text-[color:var(--text-secondary)] font-medium">{stats.breaths_total}</strong> in totale — tutti anonimi
+      </span>
+    </motion.p>
   );
 }
 
@@ -578,6 +600,13 @@ function HelpDialog({ open, onClose }) {
 // ---------- APP ----------
 function App() {
   const [helpOpen, setHelpOpen] = useState(false);
+  useEffect(() => {
+    // Conteggio visite aggregato, zero cookie: una sola ping per sessione di navigazione
+    if (!sessionStorage.getItem("ss_visit")) {
+      sessionStorage.setItem("ss_visit", "1");
+      axios.post(`${API}/events/visit`).catch(() => {});
+    }
+  }, []);
   return (
     <div className="min-h-screen grain">
       <Nav />
