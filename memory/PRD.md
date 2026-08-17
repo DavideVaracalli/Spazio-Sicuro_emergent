@@ -62,3 +62,10 @@ REACT_APP_TOOL_URL=https://spaziosicuro.it (o quello Netlify attuale)
 - URL assoluti (canonical, sitemap, robots) quando dominio disponibile
 - Retry-After header su 429
 - BackgroundTasks per email Resend (invece di asyncio.create_task)
+
+## Aggiornamento 17/06/2026 (fork) — Email Resend ATTIVATE
+- RESEND_API_KEY configurata in backend/.env (fornita dall'utente, account registrato con davide.varacalli.spaziosicuro@gmail.com)
+- OWNER_EMAIL = davide.varacalli.spaziosicuro@gmail.com
+- Test reale eseguito: email inviata con successo (log: "Notification email sent")
+- Verifica completa post-fork: health OK, form contatti OK (salvataggio DB), honeypot OK, download endpoints OK (basic/full-app/pdf 200), landing page OK
+- Nota free tier Resend: le email arrivano SOLO all'indirizzo di registrazione finché non si verifica un dominio; mittente = onboarding@resend.dev (controllare spam)
