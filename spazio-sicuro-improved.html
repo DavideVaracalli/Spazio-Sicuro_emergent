@@ -730,9 +730,8 @@ let breathTimer = null;
 let breathRunning = false;
 let breathCycles = 0;
 
-/* Contatore anonimo aggregato: invia solo un "ping" senza alcun dato personale.
-   Cambia questo URL con il tuo dominio quando pubblichi la landing. */
-const STATS_API = 'https://youth-diary-1.preview.emergentagent.com/api/events/breath';
+/* Contatore anonimo aggregato: invia solo un "ping" senza alcun dato personale. */
+const STATS_API = 'https://spazio-sicuro.it/api/events/breath';
 function pingBreath(){
   try{
     if(navigator.sendBeacon) navigator.sendBeacon(STATS_API);

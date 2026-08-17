@@ -79,3 +79,10 @@ REACT_APP_TOOL_URL=https://spaziosicuro.it (o quello Netlify attuale)
 - Auto-reply: send_confirmation_email al mittente del form. NOTA: con Resend free tier funziona solo verso l'email del proprietario finché il dominio non è verificato (fallisce silenziosamente per altri, loggato come warning).
 - Test: tutti endpoint verificati via curl (204/404/403/200), counter visibile in screenshot, entrambe le email inviate con successo nei log.
 - Dominio: guida fornita all'utente. TODO quando acquistato: CORS_ORIGINS, STATS_API nell'HTML, SENDER_EMAIL con dominio verificato Resend, REACT_APP_TOOL_URL.
+
+## Aggiornamento 17/06/2026 (3) — Dominio spazio-sicuro.it acquistato (Register.it)
+- CORS_ORIGINS ora specifico: spazio-sicuro.it, www.spazio-sicuro.it, netlify tool, preview URL (verificato: origin non in lista → nessun header CORS)
+- SEO aggiornato: canonical/og:url/og:image assoluti su https://spazio-sicuro.it, sitemap.xml e robots.txt con URL assoluti
+- STATS_API nel tool HTML → https://spazio-sicuro.it/api/events/breath (zip basic rigenerato)
+- SENDER_EMAIL ancora onboarding@resend.dev: da cambiare in info@spazio-sicuro.it DOPO verifica dominio su Resend
+- Prossimi step UTENTE: 1) Publish su Emergent 2) collegare dominio (Auto-link o DNS manuale su Register.it: A 162.159.142.117 + A 172.66.2.113 + CNAME www) 3) verificare dominio su Resend (record DNS SPF/DKIM) 4) avvisare agente per aggiornare SENDER_EMAIL
