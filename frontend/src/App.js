@@ -84,8 +84,9 @@ function Nav() {
   return (
     <header className="nav-shell" data-testid="main-nav">
       <div className="section-container flex items-center justify-between py-5">
-        <a href="#top" className="font-display text-xl md:text-2xl tracking-tight" data-testid="nav-logo">
-          Spazio Sicuro
+        <a href="#top" className="flex items-center gap-3" data-testid="nav-logo">
+          <img src="/logo-icon.svg" alt="" className="h-9 md:h-11 w-auto" />
+          <span className="text-xl md:text-2xl font-semibold tracking-tight" style={{color:"#F3F1EC"}}>Spazio Sicuro</span>
         </a>
         <NavDesktop />
         <button className="lg:hidden text-[color:var(--text)]" onClick={() => setOpen(!open)}
@@ -530,7 +531,10 @@ function Footer() {
       <div className="section-container">
         <div className="flex flex-wrap items-start justify-between gap-8">
           <div>
-            <div className="font-display text-xl mb-2">Spazio Sicuro</div>
+            <div className="flex items-center gap-2.5 mb-3">
+              <img src="/logo-icon.svg" alt="" className="h-8 w-auto" />
+              <span className="text-lg font-semibold tracking-tight" style={{color:"#F3F1EC"}}>Spazio Sicuro</span>
+            </div>
             <p className="text-sm text-[color:var(--text-muted)] max-w-md leading-relaxed">
               Uno spazio digitale anonimo per esprimere emozioni senza giudizio.
               Progetto sociale indipendente, senza fini di lucro.

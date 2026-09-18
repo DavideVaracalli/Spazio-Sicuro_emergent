@@ -86,3 +86,9 @@ REACT_APP_TOOL_URL=https://spaziosicuro.it (o quello Netlify attuale)
 - STATS_API nel tool HTML → https://spazio-sicuro.it/api/events/breath (zip basic rigenerato)
 - SENDER_EMAIL ancora onboarding@resend.dev: da cambiare in info@spazio-sicuro.it DOPO verifica dominio su Resend
 - Prossimi step UTENTE: 1) Publish su Emergent 2) collegare dominio (Auto-link o DNS manuale su Register.it: A 162.159.142.117 + A 172.66.2.113 + CNAME www) 3) verificare dominio su Resend (record DNS SPF/DKIM) 4) avvisare agente per aggiornare SENDER_EMAIL
+
+## Aggiornamento 18/06/2026 — Logo utente integrato
+- Logo SVG caricato dall'utente (icona cerchio gradient + wordmark). Wordmark nel file era in path minuscoli, non modificabile.
+- Soluzione: estratta solo l'icona (/app/frontend/public/logo-icon.svg, viewBox croppato 50 40 220 220) + testo HTML "Spazio Sicuro" (maiuscole, font-semibold, #F3F1EC) accanto.
+- Integrato in: Nav landing (h-9/h-11), Footer (h-8), header PrivacyPolicy. Verificato desktop 1920 e mobile 390.
+- File completo originale pulito da metadata: /app/frontend/public/logo.svg (non più usato nella UI ma disponibile).

@@ -8,8 +8,9 @@ function PrivacyPolicy() {
     <div className="min-h-screen grain">
       <header className="nav-shell">
         <div className="section-container flex items-center justify-between py-5">
-          <Link to="/" className="font-display text-xl md:text-2xl tracking-tight" data-testid="privacy-logo">
-            Spazio Sicuro
+          <Link to="/" className="flex items-center gap-3" data-testid="privacy-logo">
+            <img src="/logo-icon.svg" alt="" className="h-9 md:h-11 w-auto" />
+            <span className="text-xl md:text-2xl font-semibold tracking-tight" style={{color:"#F3F1EC"}}>Spazio Sicuro</span>
           </Link>
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-[color:var(--text-secondary)] hover:text-[color:var(--text)] transition-colors" data-testid="back-home">
             <ArrowLeft size={16}/> Torna alla home
