@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -581,13 +581,6 @@ function HelpDialog({ open, onClose }) {
 // ---------- APP ----------
 function App() {
   const [helpOpen, setHelpOpen] = useState(false);
-  useEffect(() => {
-    // Conteggio visite aggregato, zero cookie: una sola ping per sessione di navigazione
-    if (!sessionStorage.getItem("ss_visit")) {
-      sessionStorage.setItem("ss_visit", "1");
-      axios.post(`${API}/events/visit`).catch(() => {});
-    }
-  }, []);
   return (
     <div className="min-h-screen grain">
       <Nav />
