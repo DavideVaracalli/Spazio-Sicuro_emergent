@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,8 +8,6 @@ import {
   LifeBuoy, Plus, Minus, ArrowRight, Send, Check, X, Menu
 } from "lucide-react";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
 
 // Link al tool esistente — cambiabile da .env quando avrai il dominio del tool
 const TOOL_URL = process.env.REACT_APP_TOOL_URL || "https://sweet-babka-6fe1eb.netlify.app/";
@@ -134,33 +132,12 @@ function Hero() {
               Come funziona
             </a>
           </div>
-          <BreathCounter />
         </motion.div>
       </div>
     </section>
   );
 }
 
-// ---------- CONTATORE ANONIMO ----------
-function BreathCounter() {
-  const [stats, setStats] = useState(null);
-  useEffect(() => {
-    axios.get(`${API}/stats/public`).then(r => setStats(r.data)).catch(() => {});
-  }, []);
-  if (!stats || stats.breaths_total < 1) return null;
-  return (
-    <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{duration:1, delay:0.4}}
-              className="mt-10 flex items-center gap-2.5 text-sm text-[color:var(--text-muted)]"
-              data-testid="breath-counter">
-      <Wind size={15} className="text-[color:var(--primary)] shrink-0"/>
-      <span>
-        <strong className="text-[color:var(--text-secondary)] font-medium">{stats.breaths_today}</strong>
-        {" "}respir{stats.breaths_today === 1 ? "o fatto" : "i fatti"} oggi
-        {" "}· <strong className="text-[color:var(--text-secondary)] font-medium">{stats.breaths_total}</strong> in totale — tutti anonimi
-      </span>
-    </motion.p>
-  );
-}
 
 // ---------- MANIFESTO ----------
 function Manifesto() {
