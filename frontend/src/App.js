@@ -425,94 +425,134 @@ const INITIAL_CONTACT = { name:"", email:"", organization:"", role:"", message:"
 function ContactForm({ form, onChange, onSubmit, status }) {
   return (
     <motion.form
-  variants={fadeUp}
-  initial="hidden"
-  whileInView="show"
-  viewport={{once:true}}
-  onSubmit={onSubmit}
-  className="grid md:grid-cols-2 gap-4"
-  data-testid="contact-form"
-  name="collaborazione"
-  method="POST"
-  data-netlify="true"
-  data-netlify-honeypot="website"
->
-  <input
-  type="hidden"
-  name="subject"
-  value="Nuova richiesta di collaborazione — Spazio Sicuro"
-/>
-<input
-  required
-  minLength={1}
-  className="field"
-  placeholder="Nome"
-  name="name"
-  value={form.name}
-  onChange={onChange('name')}
-  data-testid="contact-name"
-/>
-<input
-  required
-  type="email"
-  className="field"
-  placeholder="Email"
-  name="email"
-  value={form.email}
-  onChange={onChange('email')}
-  data-testid="contact-email"
-/>
-    
-<input
-  className="field"
-  placeholder="Scuola / Associazione (facoltativo)"
-  name="organization"
-  value={form.organization}
-  onChange={onChange('organization')}
-  data-testid="contact-org"
-/>
-    
-<input
-  className="field"
-  placeholder="Ruolo (facoltativo)"
-  name="role"
-  value={form.role}
-  onChange={onChange('role')}
-  data-testid="contact-role"
-/>
-    
- <textarea
-  required
-  minLength={5}
-  className="field md:col-span-2"
-  rows={6}
-  placeholder="Il tuo messaggio..."
-  name="message"
-  value={form.message}
-  onChange={onChange('message')}
-  data-testid="contact-message"
-/>
+      variants={fadeUp}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true }}
+      onSubmit={onSubmit}
+      className="grid md:grid-cols-2 gap-4"
+      data-testid="contact-form"
+      name="collaborazione"
+      method="POST"
+      data-netlify="true"
+      data-netlify-honeypot="website"
+    >
+      <input type="hidden" name="form-name" value="collaborazione" />
 
-      {/* Honeypot: campo nascosto agli umani, i bot lo compileranno e verranno scartati */}
-      <div style={{position:"absolute", left:"-9999px", width:"1px", height:"1px", overflow:"hidden"}} aria-hidden="true">
-        <label>Sito web (non compilare)
-          <input type="text" tabIndex={-1} autoComplete="off"
-                 value={form.website} onChange={onChange('website')} data-testid="contact-honeypot"/>
+      <input
+        type="hidden"
+        name="subject"
+        value="Nuova richiesta di collaborazione — Spazio Sicuro"
+      />
+
+      <input
+        required
+        minLength={1}
+        className="field"
+        placeholder="Nome"
+        name="name"
+        value={form.name}
+        onChange={onChange("name")}
+        data-testid="contact-name"
+      />
+
+      <input
+        required
+        type="email"
+        className="field"
+        placeholder="Email"
+        name="email"
+        value={form.email}
+        onChange={onChange("email")}
+        data-testid="contact-email"
+      />
+
+      <input
+        className="field"
+        placeholder="Scuola / Associazione (facoltativo)"
+        name="organization"
+        value={form.organization}
+        onChange={onChange("organization")}
+        data-testid="contact-org"
+      />
+
+      <input
+        className="field"
+        placeholder="Ruolo (facoltativo)"
+        name="role"
+        value={form.role}
+        onChange={onChange("role")}
+        data-testid="contact-role"
+      />
+
+      <textarea
+        required
+        minLength={5}
+        className="field md:col-span-2"
+        rows={6}
+        placeholder="Il tuo messaggio..."
+        name="message"
+        value={form.message}
+        onChange={onChange("message")}
+        data-testid="contact-message"
+      />
+
+      {/* Honeypot: i bot lo compilano, gli utenti no */}
+      <div
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          width: "1px",
+          height: "1px",
+          overflow: "hidden"
+        }}
+        aria-hidden="true"
+      >
+        <label>
+          Sito web (non compilare)
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            value={form.website}
+            onChange={onChange("website")}
+            data-testid="contact-honeypot"
+          />
         </label>
       </div>
 
       <div className="md:col-span-2 flex flex-wrap items-center gap-4 pt-2">
-        <button type="submit" className="btn-primary" disabled={status.state==='loading'} data-testid="contact-submit">
-          {status.state==='loading' ? 'Invio…' : (<>Invia messaggio <Send size={16}/></>)}
+        <button
+          type="submit"
+          className="btn-primary"
+          disabled={status.state === "loading"}
+          data-testid="contact-submit"
+        >
+          {status.state === "loading"
+            ? "Invio…"
+            : (
+              <>
+                Invia messaggio <Send size={16} />
+              </>
+            )}
         </button>
-        {status.state==='success' && (
-          <span className="text-sm text-[color:var(--primary)] flex items-center gap-2" data-testid="contact-success">
-            <Check size={16}/> {status.msg}
+
+        {status.state === "success" && (
+          <span
+            className="text-sm text-[color:var(--primary)] flex items-center gap-2"
+            data-testid="contact-success"
+          >
+            <Check size={16} /> {status.msg}
           </span>
         )}
-        {status.state==='error' && (
-          <span className="text-sm text-[#ff8a8a] flex items-center gap-2" data-testid="contact-error">
-            <X size={16}/> {status.msg}
+
+        {status.state === "error" && (
+          <span
+            className="text-sm text-[#ff8a8a] flex items-center gap-2"
+            data-testid="contact-error"
+          >
+            <X size={16} /> {status.msg}
           </span>
         )}
       </div>
@@ -531,8 +571,7 @@ const onSubmit = async (e) => {
   setStatus({ state: "loading", msg: "" });
 
   try {
-    const formElement = e.target;
-    const formData = new FormData(formElement);
+    const formData = new FormData(e.target);
 
     await fetch("/", {
       method: "POST",
