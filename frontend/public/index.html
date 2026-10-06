@@ -35,21 +35,23 @@
 <body>
   <noscript>Per usare Spazio Sicuro attiva JavaScript nel tuo browser.</noscript>
 
-  <form
-    name="collaborazione"
-    method="POST"
-    data-netlify="true"
-    data-netlify-honeypot="website"
-    hidden
-  >
-    <input type="hidden" name="form-name" value="collaborazione" />
-    <input type="text" name="name" />
-    <input type="email" name="email" />
-    <input type="text" name="organization" />
-    <input type="text" name="role" />
-    <textarea name="message"></textarea>
-    <input type="text" name="website" />
-  </form>
+<form
+  name="collaborazione"
+  method="POST"
+  data-netlify="true"
+  data-netlify-honeypot="website"
+  hidden
+>
+  <input type="hidden" name="form-name" value="collaborazione" />
+  <input type="hidden" name="subject" value="Nuova richiesta di collaborazione — Spazio Sicuro" />
+
+  <input type="text" name="name" />
+  <input type="email" name="email" />
+  <input type="text" name="organization" />
+  <input type="text" name="role" />
+  <textarea name="message"></textarea>
+  <input type="text" name="website" />
+</form>
 
   <div id="root"></div>
 
