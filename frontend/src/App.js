@@ -437,7 +437,11 @@ function ContactForm({ form, onChange, onSubmit, status }) {
   data-netlify="true"
   data-netlify-honeypot="website"
 >
-  <input type="hidden" name="form-name" value="collaborazione" />
+  <input
+  type="hidden"
+  name="subject"
+  value="Nuova richiesta di collaborazione — Spazio Sicuro"
+/>
 <input
   required
   minLength={1}
