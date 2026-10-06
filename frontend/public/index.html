@@ -32,27 +32,26 @@
 
     <script>window.addEventListener("error",function(e){if(e.error instanceof DOMException&&e.error.name==="DataCloneError"&&e.message&&e.message.includes("PerformanceServerTiming")){e.stopImmediatePropagation();e.preventDefault()}},true);</script>
   </head>
-  <body>
-    <noscript>Per usare Spazio Sicuro attiva JavaScript nel tuo browser.</noscript>
-    <form
-  name="collaborazione"
-  method="POST"
-  data-netlify="true"
-  data-netlify-honeypot="website"
-  hidden
-      <input
-  type="hidden"
-  name="subject"
-  value="Nuova richiesta di collaborazione — Spazio Sicuro"
-/>
-  <input type="text" name="name" />
-  <input type="email" name="email" />
-  <input type="text" name="organization" />
-  <input type="text" name="role" />
-  <textarea name="message"></textarea>
-  <input type="text" name="website" />
-</form>
-    <div id="root"></div>
+<body>
+  <noscript>Per usare Spazio Sicuro attiva JavaScript nel tuo browser.</noscript>
+
+  <form
+    name="collaborazione"
+    method="POST"
+    data-netlify="true"
+    data-netlify-honeypot="website"
+    hidden
+  >
+    <input type="hidden" name="form-name" value="collaborazione" />
+    <input type="text" name="name" />
+    <input type="email" name="email" />
+    <input type="text" name="organization" />
+    <input type="text" name="role" />
+    <textarea name="message"></textarea>
+    <input type="text" name="website" />
+  </form>
+
+  <div id="root"></div>
 
     <!-- Analytics rimosso per coerenza "zero tracciamento".
          Aggiungi qui Plausible/Umami se vuoi metriche aggregate senza cookie:
