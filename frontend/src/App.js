@@ -604,13 +604,6 @@ function HelpDialog({ open, onClose }) {
 // ---------- APP ----------
 function App() {
   const [helpOpen, setHelpOpen] = useState(false);
-  useEffect(() => {
-    // Conteggio visite aggregato, zero cookie: una sola ping per sessione di navigazione
-    if (!sessionStorage.getItem("ss_visit")) {
-      sessionStorage.setItem("ss_visit", "1");
-      axios.post(`${API}/events/visit`).catch(() => {});
-    }
-  }, []);
   return (
     <div className="min-h-screen grain">
       <Nav />
