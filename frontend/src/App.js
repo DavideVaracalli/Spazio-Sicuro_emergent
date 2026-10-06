@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState,useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -8,8 +7,6 @@ import {
   LifeBuoy, Plus, Minus, ArrowRight, Send, Check, X, Menu
 } from "lucide-react";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
 
 // Link al tool esistente — cambiabile da .env quando avrai il dominio del tool
 const TOOL_URL = process.env.REACT_APP_TOOL_URL || "https://sweet-babka-6fe1eb.netlify.app/";
@@ -134,33 +131,12 @@ function Hero() {
               Come funziona
             </a>
           </div>
-          <BreathCounter />
         </motion.div>
       </div>
     </section>
   );
 }
 
-// ---------- CONTATORE ANONIMO ----------
-function BreathCounter() {
-  const [stats, setStats] = useState(null);
-  useEffect(() => {
-    axios.get(`${API}/stats/public`).then(r => setStats(r.data)).catch(() => {});
-  }, []);
-  if (!stats || stats.breaths_total < 1) return null;
-  return (
-    <motion.p initial={{opacity:0}} animate={{opacity:1}} transition={{duration:1, delay:0.4}}
-              className="mt-10 flex items-center gap-2.5 text-sm text-[color:var(--text-muted)]"
-              data-testid="breath-counter">
-      <Wind size={15} className="text-[color:var(--primary)] shrink-0"/>
-      <span>
-        <strong className="text-[color:var(--text-secondary)] font-medium">{stats.breaths_today}</strong>
-        {" "}respir{stats.breaths_today === 1 ? "o fatto" : "i fatti"} oggi
-        {" "}· <strong className="text-[color:var(--text-secondary)] font-medium">{stats.breaths_total}</strong> in totale — tutti anonimi
-      </span>
-    </motion.p>
-  );
-}
 
 // ---------- MANIFESTO ----------
 function Manifesto() {
@@ -448,14 +424,74 @@ const INITIAL_CONTACT = { name:"", email:"", organization:"", role:"", message:"
 
 function ContactForm({ form, onChange, onSubmit, status }) {
   return (
-    <motion.form variants={fadeUp} initial="hidden" whileInView="show" viewport={{once:true}}
-                 onSubmit={onSubmit} className="grid md:grid-cols-2 gap-4" data-testid="contact-form">
-      <input required minLength={1} className="field" placeholder="Nome" value={form.name} onChange={onChange('name')} data-testid="contact-name"/>
-      <input required type="email" className="field" placeholder="Email" value={form.email} onChange={onChange('email')} data-testid="contact-email"/>
-      <input className="field" placeholder="Scuola / Associazione (facoltativo)" value={form.organization} onChange={onChange('organization')} data-testid="contact-org"/>
-      <input className="field" placeholder="Ruolo (facoltativo)" value={form.role} onChange={onChange('role')} data-testid="contact-role"/>
-      <textarea required minLength={5} className="field md:col-span-2" rows={6} placeholder="Il tuo messaggio..."
-                value={form.message} onChange={onChange('message')} data-testid="contact-message"/>
+    <motion.form
+  variants={fadeUp}
+  initial="hidden"
+  whileInView="show"
+  viewport={{once:true}}
+  onSubmit={onSubmit}
+  className="grid md:grid-cols-2 gap-4"
+  data-testid="contact-form"
+  name="collaborazione"
+  method="POST"
+  data-netlify="true"
+  data-netlify-honeypot="website"
+>
+  <input
+  type="hidden"
+  name="subject"
+  value="Nuova richiesta di collaborazione — Spazio Sicuro"
+/>
+<input
+  required
+  minLength={1}
+  className="field"
+  placeholder="Nome"
+  name="name"
+  value={form.name}
+  onChange={onChange('name')}
+  data-testid="contact-name"
+/>
+<input
+  required
+  type="email"
+  className="field"
+  placeholder="Email"
+  name="email"
+  value={form.email}
+  onChange={onChange('email')}
+  data-testid="contact-email"
+/>
+    
+<input
+  className="field"
+  placeholder="Scuola / Associazione (facoltativo)"
+  name="organization"
+  value={form.organization}
+  onChange={onChange('organization')}
+  data-testid="contact-org"
+/>
+    
+<input
+  className="field"
+  placeholder="Ruolo (facoltativo)"
+  name="role"
+  value={form.role}
+  onChange={onChange('role')}
+  data-testid="contact-role"
+/>
+    
+ <textarea
+  required
+  minLength={5}
+  className="field md:col-span-2"
+  rows={6}
+  placeholder="Il tuo messaggio..."
+  name="message"
+  value={form.message}
+  onChange={onChange('message')}
+  data-testid="contact-message"
+/>
 
       {/* Honeypot: campo nascosto agli umani, i bot lo compileranno e verranno scartati */}
       <div style={{position:"absolute", left:"-9999px", width:"1px", height:"1px", overflow:"hidden"}} aria-hidden="true">
@@ -490,20 +526,35 @@ function Contact() {
 
   const onChange = (key) => (e) => setForm({ ...form, [key]: e.target.value });
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    setStatus({state:"loading", msg:""});
-    try {
-      const res = await axios.post(`${API}/contact`, form);
-      if (res.data && res.data.id) {
-        setStatus({state:"success", msg:"Grazie. Ti risponderemo appena possibile."});
-        setForm(INITIAL_CONTACT);
-      }
-    } catch (err) {
-      const detail = err?.response?.data?.detail;
-      setStatus({state:"error", msg: typeof detail === 'string' ? detail : "Si è verificato un errore. Riprova."});
-    }
-  };
+const onSubmit = async (e) => {
+  e.preventDefault();
+  setStatus({ state: "loading", msg: "" });
+
+  try {
+    const formElement = e.target;
+    const formData = new FormData(formElement);
+
+    await fetch("/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams(formData).toString(),
+    });
+
+    setStatus({
+      state: "success",
+      msg: "Grazie. Ti risponderemo appena possibile.",
+    });
+
+    setForm(INITIAL_CONTACT);
+  } catch (err) {
+    setStatus({
+      state: "error",
+      msg: "Si è verificato un errore. Riprova.",
+    });
+  }
+};
 
   return (
     <section id="contatti" className="py-24 md:py-32 border-t border-[color:var(--border)]">
